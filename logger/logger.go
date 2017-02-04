@@ -15,14 +15,12 @@ func GetLogger() *logrus.Logger {
 			log, hook = test.NewNullLogger()
 		}
 		return log
-	} else {
-		if log == nil {
-			log = logrus.New()
-			return log
-		} else {
-			return log
-		}
 	}
+	if log == nil {
+		log = logrus.New()
+		return log
+	}
+	return log
 }
 
 func SetLevel(level logrus.Level) {

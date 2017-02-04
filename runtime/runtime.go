@@ -7,4 +7,3 @@ type RTime interface {
 	Initialize(c config.GeneratorConfig, s string)
 	Stop()
 }
-

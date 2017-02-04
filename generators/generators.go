@@ -3,6 +3,8 @@ package generators
 import (
 	"encoding/json"
 	"fmt"
+	"github.com/Sirupsen/logrus"
+	"github.com/asaskevich/govalidator"
 	"github.com/kujtimiihoxha/plis/cmd"
 	"github.com/kujtimiihoxha/plis/config"
 	"github.com/kujtimiihoxha/plis/fs"
@@ -14,8 +16,6 @@ import (
 	"github.com/yuin/gopher-lua"
 	"os"
 	"strings"
-	"github.com/asaskevich/govalidator"
-	"github.com/Sirupsen/logrus"
 )
 
 func find() (globalGenerators []string, projectGenerators []string) {
@@ -24,8 +24,8 @@ func find() (globalGenerators []string, projectGenerators []string) {
 		logger.GetLogger().Fatal(err)
 	}
 	for _, f := range dirs {
-		if !strings.HasPrefix(f.Name(), ".") && strings.HasPrefix(f.Name(),"plis-"){
-			globalGenerators = append(globalGenerators, strings.TrimPrefix(f.Name(),"plis-"))
+		if !strings.HasPrefix(f.Name(), ".") && strings.HasPrefix(f.Name(), "plis-") {
+			globalGenerators = append(globalGenerators, strings.TrimPrefix(f.Name(), "plis-"))
 		}
 	}
 	dirs, err = afero.ReadDir(fs.GetCurrentFs(), "plis"+afero.FilePathSeparator+"generators")
@@ -37,8 +37,8 @@ func find() (globalGenerators []string, projectGenerators []string) {
 		}
 	}
 	for _, f := range dirs {
-		if !strings.HasPrefix(f.Name(), ".") && strings.HasPrefix(f.Name(),"plis-") {
-			projectGenerators = append(projectGenerators, strings.TrimPrefix(f.Name(),"plis-"))
+		if !strings.HasPrefix(f.Name(), ".") && strings.HasPrefix(f.Name(), "plis-") {
+			projectGenerators = append(projectGenerators, strings.TrimPrefix(f.Name(), "plis-"))
 		}
 	}
 	return
@@ -123,9 +123,9 @@ func addCmd(cmd *cobra.Command, c config.GeneratorConfig, vKey string, gFs afero
 }
 func createCommand(c config.GeneratorConfig, vKey string, gFs afero.Fs) *cobra.Command {
 	genCmd := &cobra.Command{
-		Use:   c.Name,
-		Short: c.Description,
-		Long:  helpers.FromStringArrayToString(c.LongDescription),
+		Use:     c.Name,
+		Short:   c.Description,
+		Long:    helpers.FromStringArrayToString(c.LongDescription),
 		Aliases: c.Aliases,
 	}
 	addFlags(genCmd, c, vKey)
@@ -135,7 +135,7 @@ func createCommand(c config.GeneratorConfig, vKey string, gFs afero.Fs) *cobra.C
 		defer L.Close()
 		a := L.NewTable()
 		L.NewUserData()
-		a.RawSet(lua.LString("test"), lua.LNumber(viper.GetFloat64(fmt.Sprintf("%s.flags.test",vKey))))
+		a.RawSet(lua.LString("test"), lua.LNumber(viper.GetFloat64(fmt.Sprintf("%s.flags.test", vKey))))
 		L.SetGlobal("flags", a)
 		b, _ := afero.ReadFile(gFs, "run.lua")
 		if err := L.DoString(string(b)); err != nil {
@@ -187,7 +187,7 @@ func addFlags(command *cobra.Command, c config.GeneratorConfig, vKey string) {
 	}
 }
 
-func getUsageTemplate() string  {
+func getUsageTemplate() string {
 	return `Usage:{{if .Runnable}}
   {{if .HasAvailableFlags}}{{appendIfNotPresent .UseLine "[flags]"}}{{else}}{{.UseLine}}{{end}}{{end}}{{if .HasAvailableSubCommands}}
   {{ .CommandPath}} [command]{{end}}{{if gt .Aliases 0}}
@@ -208,8 +208,7 @@ Use "{{.CommandPath}} [command] --help" for more information about a command.{{e
 `
 }
 
-
-func checkIfGeneratorProject()  {
+func checkIfGeneratorProject() {
 	logger.SetLevel(logrus.InfoLevel)
 	d, err := afero.ReadFile(fs.GetCurrentFs(), ".plis-generator.json")
 	if err != nil {
@@ -224,7 +223,7 @@ func checkIfGeneratorProject()  {
 		)
 		return
 	}
-	v,_:=govalidator.ValidateStruct(c)
+	v, _ := govalidator.ValidateStruct(c)
 	if !v {
 		logger.GetLogger().Error(
 			"Could not calidate the generator project config file, make sure you specified all the required fields",
@@ -232,8 +231,8 @@ func checkIfGeneratorProject()  {
 		return
 	}
 	currentFs := fs.GetCurrentFs()
-	fs.SetGeneratorTestFs(afero.NewBasePathFs(currentFs,c.TestDir))
-	viper.Set("plis.generator_project_name",c.GeneratorName)
-	createGeneratorCmd(currentFs,cmd.RootCmd,c.GeneratorName,fmt.Sprintf("plis.generators.%s",c.GeneratorName))
+	fs.SetGeneratorTestFs(afero.NewBasePathFs(currentFs, c.TestDir))
+	viper.Set("plis.generator_project_name", c.GeneratorName)
+	createGeneratorCmd(currentFs, cmd.RootCmd, c.GeneratorName, fmt.Sprintf("plis.generators.%s", c.GeneratorName))
 
 }

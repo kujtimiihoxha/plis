@@ -16,6 +16,7 @@ package main
 
 import (
 	"fmt"
+	"github.com/Sirupsen/logrus"
 	"github.com/asaskevich/govalidator"
 	"github.com/kujtimiihoxha/plis/cmd"
 	"github.com/kujtimiihoxha/plis/config"
@@ -26,7 +27,6 @@ import (
 	"os"
 	"os/user"
 	"path/filepath"
-	"github.com/Sirupsen/logrus"
 )
 
 func main() {
@@ -38,28 +38,27 @@ func main() {
 	cmd.Execute()
 }
 func initFirstRun() {
-	if _, err := os.Stat(viper.GetString("plis.dir.root")); err == nil {
+	var err error
+	if _, err = os.Stat(viper.GetString("plis.dir.root")); err == nil {
 		return
-	} else {
-		if os.IsNotExist(err) {
-			logger.GetLogger().Info("Plis root does not exist")
-			logger.GetLogger().Info("Initializing first run...")
-			logger.GetLogger().Info(fmt.Sprintf(
-				"Creating plis root in `%s`...",
-				viper.GetString("plis.dir.root")))
-			err := os.Mkdir(viper.GetString("plis.dir.root"), os.ModePerm)
-			if err != nil {
-				logger.GetLogger().Fatal(err)
-			}
-			err = os.Mkdir(viper.GetString("plis.dir.generators"), os.ModePerm)
-			if err != nil {
-				logger.GetLogger().Fatal(err)
-			}
-			return
-		} else {
+	}
+	if os.IsNotExist(err) {
+		logger.GetLogger().Info("Plis root does not exist")
+		logger.GetLogger().Info("Initializing first run...")
+		logger.GetLogger().Info(fmt.Sprintf(
+			"Creating plis root in `%s`...",
+			viper.GetString("plis.dir.root")))
+		err := os.Mkdir(viper.GetString("plis.dir.root"), os.ModePerm)
+		if err != nil {
 			logger.GetLogger().Fatal(err)
 		}
+		err = os.Mkdir(viper.GetString("plis.dir.generators"), os.ModePerm)
+		if err != nil {
+			logger.GetLogger().Fatal(err)
+		}
+		return
 	}
+	logger.GetLogger().Fatal(err)
 }
 func configDefaults() {
 	usr, err := user.Current()

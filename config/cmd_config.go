@@ -14,15 +14,15 @@ type GeneratorConfig struct {
 	Name            string          `json:"name" valid:"required"`
 	Description     string          `json:"description" valid:"required"`
 	LongDescription []string        `json:"long_description"`
-	Aliases []string        	`json:"aliases"`
+	Aliases         []string        `json:"aliases"`
 	Args            []GeneratorArgs `json:"args"`
 	Flags           []GeneratorFlag `json:"flags"`
 	SubCommands     []string        `json:"sub_commands"`
 	ScriptType      string          `json:"script_type" valid:"scriptType,required"`
 }
-type GeneratorProjectConfig struct{
+type GeneratorProjectConfig struct {
 	GeneratorName string `json:"generator_name" valid:"required"`
-	TestDir string `json:"test_dir" valid:"required"`
+	TestDir       string `json:"test_dir" valid:"required"`
 }
 type GeneratorFlag struct {
 	Name        string      `json:"name" valid:"required"`
