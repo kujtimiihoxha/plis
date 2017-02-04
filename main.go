@@ -26,16 +26,18 @@ import (
 	"os"
 	"os/user"
 	"path/filepath"
+	"github.com/Sirupsen/logrus"
 )
 
 func main() {
 	setupConfigValidator()
 	configDefaults()
-	initRoot()
+	initFirstRun()
+	logger.SetLevel(logrus.WarnLevel)
 	generators.Initialize()
 	cmd.Execute()
 }
-func initRoot() {
+func initFirstRun() {
 	if _, err := os.Stat(viper.GetString("plis.dir.root")); err == nil {
 		return
 	} else {

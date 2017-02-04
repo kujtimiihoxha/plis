@@ -24,6 +24,13 @@ func GetLogger() *logrus.Logger {
 		}
 	}
 }
+
+func SetLevel(level logrus.Level) {
+	if log == nil {
+		log = logrus.New()
+	}
+	log.Level = level
+}
 func GetHook() *test.Hook {
 	if log == nil && hook == nil {
 		log, hook = test.NewNullLogger()

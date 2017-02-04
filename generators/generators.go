@@ -11,9 +11,11 @@ import (
 	"github.com/spf13/afero"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
+	"github.com/yuin/gopher-lua"
 	"os"
 	"strings"
-	"github.com/yuin/gopher-lua"
+	"github.com/asaskevich/govalidator"
+	"github.com/Sirupsen/logrus"
 )
 
 func find() (globalGenerators []string, projectGenerators []string) {
@@ -22,8 +24,8 @@ func find() (globalGenerators []string, projectGenerators []string) {
 		logger.GetLogger().Fatal(err)
 	}
 	for _, f := range dirs {
-		if !strings.HasPrefix(f.Name(), ".") {
-			globalGenerators = append(globalGenerators, f.Name())
+		if !strings.HasPrefix(f.Name(), ".") && strings.HasPrefix(f.Name(),"plis-"){
+			globalGenerators = append(globalGenerators, strings.TrimPrefix(f.Name(),"plis-"))
 		}
 	}
 	dirs, err = afero.ReadDir(fs.GetCurrentFs(), "plis"+afero.FilePathSeparator+"generators")
@@ -35,8 +37,8 @@ func find() (globalGenerators []string, projectGenerators []string) {
 		}
 	}
 	for _, f := range dirs {
-		if !strings.HasPrefix(f.Name(), ".") {
-			projectGenerators = append(projectGenerators, f.Name())
+		if !strings.HasPrefix(f.Name(), ".") && strings.HasPrefix(f.Name(),"plis-") {
+			projectGenerators = append(projectGenerators, strings.TrimPrefix(f.Name(),"plis-"))
 		}
 	}
 	return
@@ -44,57 +46,42 @@ func find() (globalGenerators []string, projectGenerators []string) {
 
 func Initialize() {
 	globalGenerators, projectGenerators := find()
-	if len(globalGenerators) > 0 {
-		createGeneratorCmd(
-			fs.GetPlisRootFs(),
-			globalGenerators,
-			"",
-		)
+	for _, v := range globalGenerators {
+		vKey := fmt.Sprintf("plis.generators.%s", v)
+		gFs := afero.NewBasePathFs(fs.GetPlisRootFs(), fmt.Sprintf("generators%splis-%s", afero.FilePathSeparator, v))
+		createGeneratorCmd(gFs, cmd.RootCmd, v, vKey)
 	}
-	if len(projectGenerators) > 0 {
-		createGeneratorCmd(
-			afero.NewBasePathFs(
-				fs.GetCurrentFs(),
-				afero.FilePathSeparator+"plis"),
-			projectGenerators,
-			"",
-		)
+	for _, v := range projectGenerators {
+		vKey := fmt.Sprintf("plis.generators.%s", v)
+		gFs := afero.NewBasePathFs(fs.GetCurrentFs(), fmt.Sprintf("plis%sgenerators%plis-%s", afero.FilePathSeparator, afero.FilePathSeparator, v))
+		createGeneratorCmd(gFs, cmd.RootCmd, v, vKey)
 	}
+	checkIfGeneratorProject()
 }
-func createGeneratorCmd(fs afero.Fs, generators []string, subPath string) {
-	if subPath != "" {
-		subPath = afero.FilePathSeparator + subPath + afero.FilePathSeparator
-	} else {
-		subPath = afero.FilePathSeparator
-	}
-	for _, v := range generators {
-		d, err := afero.ReadFile(
-			fs,
-			"generators"+afero.FilePathSeparator+v+subPath+"config.json",
+func createGeneratorCmd(fs afero.Fs, cmd *cobra.Command, generator string, vKey string) {
+	d, err := afero.ReadFile(fs, "config.json")
+	if err != nil {
+		logger.GetLogger().Errorf(
+			"Generator `%s` has no config file and it will be ignored",
+			generator,
 		)
-		if err != nil {
-			logger.GetLogger().Errorf(
-				"Generator `%s` has no config file and it will be ignored",
-				v,
-			)
-			continue
-		}
-		c := config.GeneratorConfig{}
-		err = json.Unmarshal(d, &c)
-		if err != nil {
-			logger.GetLogger().Errorf(
-				"Could not read the config file of `%s` generator, this generator will be ignored",
-				v,
-			)
-			continue
-		}
-		if c.Name == "" {
-			c.Name = v
-		}
-		addCmd(cmd.RootCmd, c, cmd.RootCmd.Name())
+		return
 	}
+	c := config.GeneratorConfig{}
+	err = json.Unmarshal(d, &c)
+	if err != nil {
+		logger.GetLogger().Errorf(
+			"Could not read the config file of `%s` generator, this generator will be ignored",
+			generator,
+		)
+		return
+	}
+	if c.Name == "" {
+		c.Name = generator
+	}
+	addCmd(cmd, c, vKey, fs)
 }
-func addCmd(cmd *cobra.Command, c config.GeneratorConfig, viperBase string) {
+func addCmd(cmd *cobra.Command, c config.GeneratorConfig, vKey string, gFs afero.Fs) {
 	logger.GetLogger().Infof("Validating generator `%s`...", c.Name)
 	if c.Validate() {
 		logger.GetLogger().Info("Validation Ok")
@@ -125,34 +112,39 @@ func addCmd(cmd *cobra.Command, c config.GeneratorConfig, viperBase string) {
 		logger.GetLogger().Warn("This comand will be ignored")
 		return
 	}
-	newC := createCommand(c, viperBase)
+	newC := createCommand(c, vKey, gFs)
 	cmd.AddCommand(newC)
+	for _, v := range c.SubCommands {
+		_gFs := afero.NewBasePathFs(gFs, v)
+		_vKey := fmt.Sprintf("%s.%s", vKey, v)
+		createGeneratorCmd(_gFs, newC, v, _vKey)
+	}
 	// update viper base.
 }
-func createCommand(c config.GeneratorConfig, viperBase string) *cobra.Command {
+func createCommand(c config.GeneratorConfig, vKey string, gFs afero.Fs) *cobra.Command {
 	genCmd := &cobra.Command{
 		Use:   c.Name,
 		Short: c.Description,
 		Long:  helpers.FromStringArrayToString(c.LongDescription),
-		// Uncomment the following line if your bare application
-		// has an action associated with it:
-		Run: func(cmd *cobra.Command, args []string) {
-			L := lua.NewState()
-			defer L.Close()
-			a := L.NewTable()
-			L.NewUserData()
-			a.RawSet(lua.LString("test"),lua.LNumber(123))
-			L.SetGlobal("flags",a)
-			b,_:=afero.ReadFile(fs.GetPlisRootFs(),"generators/test/run.lua")
-			if err := L.DoString(string(b)); err != nil {
-				panic(err)
-			}
-		},
+		Aliases: c.Aliases,
 	}
-	addFlags(genCmd, c, viperBase)
+	addFlags(genCmd, c, vKey)
+	genCmd.SetHelpTemplate(getUsageTemplate())
+	genCmd.Run = func(cmd *cobra.Command, args []string) {
+		L := lua.NewState()
+		defer L.Close()
+		a := L.NewTable()
+		L.NewUserData()
+		a.RawSet(lua.LString("test"), lua.LNumber(viper.GetFloat64(fmt.Sprintf("%s.flags.test",vKey))))
+		L.SetGlobal("flags", a)
+		b, _ := afero.ReadFile(gFs, "run.lua")
+		if err := L.DoString(string(b)); err != nil {
+			panic(err)
+		}
+	}
 	return genCmd
 }
-func addFlags(command *cobra.Command, c config.GeneratorConfig, viperBase string) {
+func addFlags(command *cobra.Command, c config.GeneratorConfig, vKey string) {
 	for _, v := range c.Flags {
 		if v.Persistent {
 			switch v.Type {
@@ -161,36 +153,87 @@ func addFlags(command *cobra.Command, c config.GeneratorConfig, viperBase string
 			case "int":
 				f := v.Default.(float64)
 				iv := int(f)
-				command.PersistentFlags().IntP(v.Name, v.Short,  iv, v.Description)
+				command.PersistentFlags().IntP(v.Name, v.Short, iv, v.Description)
 			case "float":
 				f := v.Default.(float64)
-				command.PersistentFlags().Float64P(v.Name,  v.Short, f, v.Description)
+				command.PersistentFlags().Float64P(v.Name, v.Short, f, v.Description)
 			case "bool":
 				b := v.Default.(bool)
-				command.PersistentFlags().BoolP(v.Name,  v.Short, b, v.Description)
+				command.PersistentFlags().BoolP(v.Name, v.Short, b, v.Description)
 			}
-			n := fmt.Sprintf("%s.%s.flags.%s", viperBase, c.Name, v.Name)
-			cmd.PersistentFlags = append(cmd.PersistentFlags,n)
+			n := fmt.Sprintf("%s.flags.%s", vKey, v.Name)
+			cmd.PersistentFlags = append(cmd.PersistentFlags, n)
 			viper.BindPFlag(n, command.PersistentFlags().Lookup(v.Name))
 		} else {
 			switch v.Type {
 			case "string":
-				command.Flags().StringP(v.Name,  v.Short, v.Default.(string), v.Description)
-				n := fmt.Sprintf("%s.%s.flags.%s", viperBase, c.Name, v.Name)
+				command.Flags().StringP(v.Name, v.Short, v.Default.(string), v.Description)
+				n := fmt.Sprintf("%s.flags.%s", vKey, v.Name)
 				viper.BindPFlag(n, command.PersistentFlags().Lookup(v.Name))
 			case "int":
 				f := v.Default.(float64)
 				iv := int(f)
-				command.Flags().IntP(v.Name, v.Short,  iv, v.Description)
+				command.Flags().IntP(v.Name, v.Short, iv, v.Description)
 			case "float":
 				f := v.Default.(float64)
-				command.Flags().Float64P(v.Name, v.Short,  f, v.Description)
+				command.Flags().Float64P(v.Name, v.Short, f, v.Description)
 			case "bool":
 				b := v.Default.(bool)
-				command.Flags().BoolP(v.Name, v.Short,  b, v.Description)
+				command.Flags().BoolP(v.Name, v.Short, b, v.Description)
 			}
-			n := fmt.Sprintf("%s.%s.flags.%s", viperBase, c.Name, v.Name)
+			n := fmt.Sprintf("%s.flags.%s", vKey, v.Name)
 			viper.BindPFlag(n, command.Flags().Lookup(v.Name))
 		}
 	}
+}
+
+func getUsageTemplate() string  {
+	return `Usage:{{if .Runnable}}
+  {{if .HasAvailableFlags}}{{appendIfNotPresent .UseLine "[flags]"}}{{else}}{{.UseLine}}{{end}}{{end}}{{if .HasAvailableSubCommands}}
+  {{ .CommandPath}} [command]{{end}}{{if gt .Aliases 0}}
+Aliases:
+  {{.NameAndAliases}}
+{{end}}{{if .HasExample}}
+Examples:
+{{ .Example }}{{end}}{{ if .HasAvailableSubCommands}}
+Available Commands:{{range .Commands}}{{if .IsAvailableCommand}}
+  {{rpad .NameAndAliases .NamePadding }} {{.Short}}{{end}}{{end}}{{end}}{{ if .HasAvailableLocalFlags}}
+Flags:
+{{.LocalFlags.FlagUsages | trimRightSpace}}{{end}}{{ if .HasAvailableInheritedFlags}}
+Global Flags:
+{{.InheritedFlags.FlagUsages | trimRightSpace}}{{end}}{{if .HasHelpSubCommands}}
+Additional help topics:{{range .Commands}}{{if .IsHelpCommand}}
+  {{rpad .CommandPath .CommandPathPadding}} {{.Short}}{{end}}{{end}}{{end}}{{ if .HasAvailableSubCommands }}
+Use "{{.CommandPath}} [command] --help" for more information about a command.{{end}}
+`
+}
+
+
+func checkIfGeneratorProject()  {
+	logger.SetLevel(logrus.InfoLevel)
+	d, err := afero.ReadFile(fs.GetCurrentFs(), ".plis-generator.json")
+	if err != nil {
+		return
+	}
+	c := config.GeneratorProjectConfig{}
+	err = json.Unmarshal(d, &c)
+	if err != nil {
+		logger.GetLogger().Error(
+			"Could not read the generator project config file",
+			err,
+		)
+		return
+	}
+	v,_:=govalidator.ValidateStruct(c)
+	if !v {
+		logger.GetLogger().Error(
+			"Could not calidate the generator project config file, make sure you specified all the required fields",
+		)
+		return
+	}
+	currentFs := fs.GetCurrentFs()
+	fs.SetGeneratorTestFs(afero.NewBasePathFs(currentFs,c.TestDir))
+	viper.Set("plis.generator_project_name",c.GeneratorName)
+	createGeneratorCmd(currentFs,cmd.RootCmd,c.GeneratorName,fmt.Sprintf("plis.generators.%s",c.GeneratorName))
+
 }

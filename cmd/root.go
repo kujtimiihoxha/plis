@@ -18,7 +18,9 @@ import (
 	"github.com/kujtimiihoxha/plis/logger"
 	"github.com/spf13/cobra"
 )
+
 var PersistentFlags []string = []string{}
+
 // RootCmd represents the base command when called without any subcommands
 var RootCmd = &cobra.Command{
 	Use:   "plis",

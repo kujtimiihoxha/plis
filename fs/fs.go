@@ -8,6 +8,7 @@ import (
 
 var plisRootFs afero.Fs
 var currentFs afero.Fs
+var generatorTestDir afero.Fs
 
 func initialize() {
 	if viper.GetString("plis.dir.root") == "" {
@@ -34,4 +35,12 @@ func GetCurrentFs() afero.Fs {
 		initialize()
 	}
 	return currentFs
+}
+
+func SetGeneratorTestFs(fs afero.Fs) {
+	generatorTestDir = fs
+}
+
+func GetGeneratorTestFs() afero.Fs {
+	return generatorTestDir
 }
