@@ -9,6 +9,8 @@ import (
 	"github.com/yuin/gopher-lua"
 	"regexp"
 	"bytes"
+	"encoding/json"
+	"github.com/kujtimiihoxha/plis/helpers"
 )
 
 func copyTemplate(lr LuaRuntime, L *lua.LState) int {
@@ -43,7 +45,59 @@ func copyTemplate(lr LuaRuntime, L *lua.LState) int {
 	L.Push(lua.LNil)
 	return 1
 }
+func toJsonFile(L *lua.LState) int {
+	destination := L.ToString(1)
+	lModel := L.ToTable(2)
+	model := toGoValue(lModel)
+	err := module.ToJsonFile(destination,model,fs.GetCurrentFs())
+	if err != nil {
+		L.Push(lua.LString(err.Error()))
+		return 1
+	}
+	L.Push(lua.LNil)
+	return 1
+}
 
+func jsonDecode(L *lua.LState) int {
+	str := L.CheckString(1)
+
+	var value interface{}
+	err := json.Unmarshal([]byte(str), &value)
+	if err != nil {
+		L.Push(lua.LNil)
+		L.Push(lua.LString(err.Error()))
+		return 2
+	}
+	L.Push(helpers.FromJSON(L, value))
+	return 1
+}
+
+func jsonEncode(L *lua.LState) int {
+	value := L.CheckAny(1)
+
+	visited := make(map[*lua.LTable]bool)
+	data, err := helpers.ToJSON(value, visited)
+	if err != nil {
+		L.Push(lua.LNil)
+		L.Push(lua.LString(err.Error()))
+		return 2
+	}
+	L.Push(lua.LString(string(data)))
+	return 1
+}
+func jsonEncodeF(L *lua.LState) int {
+	value := L.CheckAny(1)
+
+	visited := make(map[*lua.LTable]bool)
+	data, err := helpers.ToJSONFormat(value, visited)
+	if err != nil {
+		L.Push(lua.LNil)
+		L.Push(lua.LString(err.Error()))
+		return 2
+	}
+	L.Push(lua.LString(string(data)))
+	return 1
+}
 func toGoValue(lv lua.LValue) interface{} {
 	switch v := lv.(type) {
 	case *lua.LNilType:
@@ -57,7 +111,7 @@ func toGoValue(lv lua.LValue) interface{} {
 	case *lua.LTable:
 		maxn := v.MaxN()
 		if maxn == 0 { // table
-			ret := make(map[interface{}]interface{})
+			ret := make(map[string]interface{})
 			v.ForEach(func(key, value lua.LValue) {
 				keystr := fmt.Sprint(toGoValue(key))
 				ret[toCamelCase(keystr)] = toGoValue(value)
@@ -74,7 +128,6 @@ func toGoValue(lv lua.LValue) interface{} {
 		return v
 	}
 }
-
 var camelingRegex = regexp.MustCompile("[0-9A-Za-z]+")
 
 func toCamelCase(src string)(string){
@@ -109,5 +162,9 @@ func InitializeModule(lr LuaRuntime) map[string]lua.LGFunction {
 			return copyTemplate(lr, l)
 		},
 		"readFile": readFile,
+		"toJsonFile": toJsonFile,
+		"jsonDecode": jsonDecode,
+		"jsonEncode": jsonEncode,
+		"jsonEncodeF": jsonEncodeF,
 	}
 }
