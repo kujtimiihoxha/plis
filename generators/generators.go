@@ -10,10 +10,10 @@ import (
 	"github.com/kujtimiihoxha/plis/fs"
 	"github.com/kujtimiihoxha/plis/helpers"
 	"github.com/kujtimiihoxha/plis/logger"
+	"github.com/kujtimiihoxha/plis/runtime"
 	"github.com/spf13/afero"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
-	"github.com/yuin/gopher-lua"
 	"os"
 	"strings"
 )
@@ -43,7 +43,6 @@ func find() (globalGenerators []string, projectGenerators []string) {
 	}
 	return
 }
-
 func Initialize() {
 	globalGenerators, projectGenerators := find()
 	for _, v := range globalGenerators {
@@ -130,17 +129,11 @@ func createCommand(c config.GeneratorConfig, vKey string, gFs afero.Fs) *cobra.C
 	}
 	addFlags(genCmd, c, vKey)
 	genCmd.SetHelpTemplate(getUsageTemplate())
-	genCmd.Run = func(cmd *cobra.Command, args []string) {
-		L := lua.NewState()
-		defer L.Close()
-		a := L.NewTable()
-		L.NewUserData()
-		a.RawSet(lua.LString("test"), lua.LNumber(viper.GetFloat64(fmt.Sprintf("%s.flags.test", vKey))))
-		L.SetGlobal("flags", a)
-		b, _ := afero.ReadFile(gFs, "run.lua")
-		if err := L.DoString(string(b)); err != nil {
-			panic(err)
-		}
+	switch c.ScriptType {
+	case "lua":
+		runtime.AddRuntime(genCmd, c, runtime.LuaRuntime{}, gFs)
+	default:
+		runtime.AddRuntime(genCmd, c, runtime.LuaRuntime{}, gFs)
 	}
 	return genCmd
 }
@@ -186,7 +179,6 @@ func addFlags(command *cobra.Command, c config.GeneratorConfig, vKey string) {
 		}
 	}
 }
-
 func getUsageTemplate() string {
 	return `Usage:{{if .Runnable}}
   {{if .HasAvailableFlags}}{{appendIfNotPresent .UseLine "[flags]"}}{{else}}{{.UseLine}}{{end}}{{end}}{{if .HasAvailableSubCommands}}
@@ -207,7 +199,6 @@ Additional help topics:{{range .Commands}}{{if .IsHelpCommand}}
 Use "{{.CommandPath}} [command] --help" for more information about a command.{{end}}
 `
 }
-
 func checkIfGeneratorProject() {
 	logger.SetLevel(logrus.InfoLevel)
 	d, err := afero.ReadFile(fs.GetCurrentFs(), ".plis-generator.json")

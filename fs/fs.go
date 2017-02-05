@@ -34,6 +34,9 @@ func GetCurrentFs() afero.Fs {
 	if currentFs == nil {
 		initialize()
 	}
+	if viper.GetBool("plis.is_generator_project"){
+		return generatorTestDir
+	}
 	return currentFs
 }
 
