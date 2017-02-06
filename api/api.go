@@ -1,9 +1,9 @@
-package module
+package api
 
 import (
+	"encoding/json"
 	"github.com/spf13/afero"
 	"os"
-	"encoding/json"
 )
 
 func ReadFile(path string, fs afero.Fs) (string, error) {
@@ -13,8 +13,8 @@ func ReadFile(path string, fs afero.Fs) (string, error) {
 func WriteFile(data string, path string, fs afero.Fs) error {
 	return afero.WriteFile(fs, path, []byte(data), os.ModePerm)
 }
-func ToJsonFile(path string, m interface{}, fs afero.Fs)  error{
-	d, err :=json.MarshalIndent(m, "", "    ")
+func ToJsonFile(path string, m interface{}, fs afero.Fs) error {
+	d, err := json.MarshalIndent(m, "", "    ")
 	if err != nil {
 		return err
 	}

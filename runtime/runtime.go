@@ -13,10 +13,10 @@ type RTime interface {
 }
 
 func AddRuntime(cmd *cobra.Command, c config.GeneratorConfig, r RTime, gFs afero.Fs) {
-	rt := r.Initialize(c, gFs)
 	cmd.RunE = func(cd *cobra.Command, args []string) error {
+		rt := r.Initialize(c, gFs)
 		if cd.Name() == viper.GetString("plis.generator_project_name") {
-			viper.Set("plis.is_generator_project",true)
+			viper.Set("plis.is_generator_project", true)
 		}
 		return rt.Run()
 	}
