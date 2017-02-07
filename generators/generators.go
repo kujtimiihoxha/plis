@@ -46,18 +46,16 @@ func find() (globalGenerators []string, projectGenerators []string) {
 func Initialize() {
 	globalGenerators, projectGenerators := find()
 	for _, v := range globalGenerators {
-		vKey := fmt.Sprintf("plis.generators.%s", v)
 		gFs := afero.NewBasePathFs(fs.GetPlisRootFs(), fmt.Sprintf("generators%splis-%s", afero.FilePathSeparator, v))
-		createGeneratorCmd(gFs, cmd.RootCmd, v, vKey)
+		createGeneratorCmd(gFs, cmd.RootCmd, v)
 	}
 	for _, v := range projectGenerators {
-		vKey := fmt.Sprintf("plis.generators.%s", v)
 		gFs := afero.NewBasePathFs(fs.GetCurrentFs(), fmt.Sprintf("plis%sgenerators%plis-%s", afero.FilePathSeparator, afero.FilePathSeparator, v))
-		createGeneratorCmd(gFs, cmd.RootCmd, v, vKey)
+		createGeneratorCmd(gFs, cmd.RootCmd, v)
 	}
 	checkIfGeneratorProject()
 }
-func createGeneratorCmd(fs afero.Fs, cmd *cobra.Command, generator string, vKey string) {
+func createGeneratorCmd(fs afero.Fs, cmd *cobra.Command, generator string) {
 	d, err := afero.ReadFile(fs, "config.json")
 	if err != nil {
 		logger.GetLogger().Errorf(
@@ -78,9 +76,9 @@ func createGeneratorCmd(fs afero.Fs, cmd *cobra.Command, generator string, vKey 
 	if c.Name == "" {
 		c.Name = generator
 	}
-	addCmd(cmd, c, vKey, fs)
+	addCmd(cmd, c, fs)
 }
-func addCmd(cmd *cobra.Command, c config.GeneratorConfig, vKey string, gFs afero.Fs) {
+func addCmd(cmd *cobra.Command, c config.GeneratorConfig, gFs afero.Fs) {
 	logger.GetLogger().Infof("Validating generator `%s`...", c.Name)
 	if c.Validate() {
 		logger.GetLogger().Info("Validation Ok")
@@ -111,23 +109,22 @@ func addCmd(cmd *cobra.Command, c config.GeneratorConfig, vKey string, gFs afero
 		logger.GetLogger().Warn("This comand will be ignored")
 		return
 	}
-	newC := createCommand(c, vKey, gFs)
+	newC := createCommand(c, gFs)
 	cmd.AddCommand(newC)
 	for _, v := range c.SubCommands {
 		_gFs := afero.NewBasePathFs(gFs, v)
-		_vKey := fmt.Sprintf("%s.%s", vKey, v)
-		createGeneratorCmd(_gFs, newC, v, _vKey)
+		createGeneratorCmd(_gFs, newC, v)
 	}
 	// update viper base.
 }
-func createCommand(c config.GeneratorConfig, vKey string, gFs afero.Fs) *cobra.Command {
+func createCommand(c config.GeneratorConfig, gFs afero.Fs) *cobra.Command {
 	genCmd := &cobra.Command{
 		Use:     c.Name,
 		Short:   c.Description,
 		Long:    helpers.FromStringArrayToString(c.LongDescription),
 		Aliases: c.Aliases,
 	}
-	addFlags(genCmd, c, vKey)
+	addFlags(genCmd, c)
 	genCmd.SetHelpTemplate(getUsageTemplate())
 	switch c.ScriptType {
 	case "lua":
@@ -137,7 +134,7 @@ func createCommand(c config.GeneratorConfig, vKey string, gFs afero.Fs) *cobra.C
 	}
 	return genCmd
 }
-func addFlags(command *cobra.Command, c config.GeneratorConfig, vKey string) {
+func addFlags(command *cobra.Command, c config.GeneratorConfig) {
 	for _, v := range c.Flags {
 		if v.Persistent {
 			switch v.Type {
@@ -154,15 +151,10 @@ func addFlags(command *cobra.Command, c config.GeneratorConfig, vKey string) {
 				b := v.Default.(bool)
 				command.PersistentFlags().BoolP(v.Name, v.Short, b, v.Description)
 			}
-			n := fmt.Sprintf("%s.flags.%s", vKey, v.Name)
-			cmd.PersistentFlags = append(cmd.PersistentFlags, n)
-			viper.BindPFlag(n, command.PersistentFlags().Lookup(v.Name))
 		} else {
 			switch v.Type {
 			case "string":
 				command.Flags().StringP(v.Name, v.Short, v.Default.(string), v.Description)
-				n := fmt.Sprintf("%s.flags.%s", vKey, v.Name)
-				viper.BindPFlag(n, command.PersistentFlags().Lookup(v.Name))
 			case "int":
 				f := v.Default.(float64)
 				iv := int(f)
@@ -174,8 +166,6 @@ func addFlags(command *cobra.Command, c config.GeneratorConfig, vKey string) {
 				b := v.Default.(bool)
 				command.Flags().BoolP(v.Name, v.Short, b, v.Description)
 			}
-			n := fmt.Sprintf("%s.flags.%s", vKey, v.Name)
-			viper.BindPFlag(n, command.Flags().Lookup(v.Name))
 		}
 	}
 }
@@ -224,6 +214,6 @@ func checkIfGeneratorProject() {
 	currentFs := fs.GetCurrentFs()
 	fs.SetGeneratorTestFs(afero.NewBasePathFs(currentFs, c.TestDir))
 	viper.Set("plis.generator_project_name", c.GeneratorName)
-	createGeneratorCmd(currentFs, cmd.RootCmd, c.GeneratorName, fmt.Sprintf("plis.generators.%s", c.GeneratorName))
+	createGeneratorCmd(currentFs, cmd.RootCmd, c.GeneratorName)
 
 }

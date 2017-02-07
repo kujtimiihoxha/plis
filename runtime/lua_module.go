@@ -113,9 +113,11 @@ func readFile(L *lua.LState) int {
 	L.Push(lua.LNil)
 	return 2
 }
-func ModuleLoader(lr LuaRuntime) func(L *lua.LState) int {
+func ModuleLoader(lr LuaRuntime, flags *lua.LTable, args *lua.LTable) func(L *lua.LState) int {
 	return func(L *lua.LState) int {
 		mod := L.SetFuncs(L.NewTable(), InitializeModule(lr))
+		L.SetField(mod, "flags", flags)
+		L.SetField(mod, "args", args)
 		L.Push(mod)
 		return 1
 	}

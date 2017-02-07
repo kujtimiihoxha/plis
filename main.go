@@ -38,6 +38,7 @@ func main() {
 	cmd.Execute()
 }
 func initFirstRun() {
+	cmd.RootCmd.PersistentFlags().BoolP("debug", "d", false, "Is plis debugging")
 	var err error
 	if _, err = os.Stat(viper.GetString("plis.dir.root")); err == nil {
 		return

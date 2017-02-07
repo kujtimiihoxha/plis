@@ -29,7 +29,6 @@ type GeneratorFlag struct {
 	Description string      `json:"description" valid:"required"`
 	Type        string      `json:"type" valid:"inputType"`
 	Default     interface{} `json:"default"`
-	Required    bool        `json:"required"`
 	Persistent  bool        `json:"persistent"`
 	Short       string      `json:"short" valid:"lenOne"`
 }
