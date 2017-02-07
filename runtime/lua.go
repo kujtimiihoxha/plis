@@ -8,6 +8,7 @@ import (
 	"github.com/spf13/pflag"
 	"github.com/yuin/gopher-lua"
 	"strconv"
+	"fmt"
 )
 
 type LuaRuntime struct {
@@ -24,6 +25,7 @@ func (lr LuaRuntime) Initialize(cmd *cobra.Command, args map[string]string, c co
 	})
 	argsTb := lua.LTable{}
 	for _,v:= range c.Args{
+		fmt.Println(v.Name,args[v.Name])
 		if  args[v.Name] == "" && v.Required == false {
 			switch v.Type {
 			case "string":
@@ -36,6 +38,7 @@ func (lr LuaRuntime) Initialize(cmd *cobra.Command, args map[string]string, c co
 				argsTb.RawSet(lua.LString(v.Name), lua.LBool(false))
 			}
 			argsTb.RawSet(lua.LString(v.Name), lua.LNil)
+			continue
 		}
 		argsTb.RawSet(lua.LString(v.Name), getArgumentByType(v.Type, args[v.Name], v.Name))
 	}
