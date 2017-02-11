@@ -4,15 +4,15 @@ import (
 	"github.com/spf13/cobra"
 )
 
-type PlisApi struct {
+type PlisAPI struct {
 	cmd *cobra.Command
 }
 
-func (p *PlisApi) Help() {
+func (p *PlisAPI) Help() {
 	p.cmd.Help()
 }
-func NewPlisApi(cmd *cobra.Command) *PlisApi {
-	return &PlisApi{
+func NewPlisAPI(cmd *cobra.Command) *PlisAPI {
+	return &PlisAPI{
 		cmd: cmd,
 	}
 }

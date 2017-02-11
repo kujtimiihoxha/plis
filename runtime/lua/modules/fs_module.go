@@ -6,7 +6,7 @@ import (
 )
 
 type FileSystemModule struct {
-	fsApi *api.FsApi
+	fsAPI *api.FsAPI
 }
 
 func (fsm *FileSystemModule) ModuleLoader() func(L *lua.LState) int {
@@ -25,15 +25,15 @@ func (fsm *FileSystemModule) InitializeModule() map[string]lua.LGFunction {
 	}
 }
 
-func NewFileSystemModule(fsApi *api.FsApi) *FileSystemModule {
+func NewFileSystemModule(fsAPI *api.FsAPI) *FileSystemModule {
 	return &FileSystemModule{
-		fsApi: fsApi,
+		fsAPI: fsAPI,
 	}
 }
 
 func (fsm *FileSystemModule) readFile(L *lua.LState) int {
 	fName := L.CheckString(1)
-	v, err := fsm.fsApi.ReadFile(fName)
+	v, err := fsm.fsAPI.ReadFile(fName)
 	if err != nil {
 		L.RaiseError("Could not read file : '%s'", err)
 		L.Push(lua.LNil)
@@ -45,7 +45,7 @@ func (fsm *FileSystemModule) readFile(L *lua.LState) int {
 func (fsm *FileSystemModule) writeFile(L *lua.LState) int {
 	path := L.CheckString(1)
 	data := L.CheckString(2)
-	err := fsm.fsApi.WriteFile(path, data)
+	err := fsm.fsAPI.WriteFile(path, data)
 	if err != nil {
 		L.RaiseError("Could not write file : '%s'", err)
 		return 0
@@ -54,7 +54,7 @@ func (fsm *FileSystemModule) writeFile(L *lua.LState) int {
 }
 func (fsm *FileSystemModule) mkdir(L *lua.LState) int {
 	path := L.CheckString(1)
-	err := fsm.fsApi.Mkdir(path)
+	err := fsm.fsAPI.Mkdir(path)
 	if err != nil {
 		L.RaiseError("Could not create directory file : '%s'", err)
 		return 0
@@ -63,7 +63,7 @@ func (fsm *FileSystemModule) mkdir(L *lua.LState) int {
 }
 func (fsm *FileSystemModule) mkdirAll(L *lua.LState) int {
 	path := L.CheckString(1)
-	err := fsm.fsApi.MkdirAll(path)
+	err := fsm.fsAPI.MkdirAll(path)
 	if err != nil {
 		L.RaiseError("Could not create directories file : '%s'", err)
 		return 0

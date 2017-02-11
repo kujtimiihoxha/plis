@@ -1,3 +1,3 @@
 package api
 
-type JsonApi struct{}
+type JSONAPI struct{}

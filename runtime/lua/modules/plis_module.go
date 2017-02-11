@@ -6,7 +6,7 @@ import (
 )
 
 type PlisModule struct {
-	plisApi *api.PlisApi
+	plisAPI *api.PlisAPI
 	flags   *lua.LTable
 	args    *lua.LTable
 }
@@ -26,12 +26,12 @@ func (p *PlisModule) InitializeModule() map[string]lua.LGFunction {
 	}
 }
 func (p *PlisModule) help(L *lua.LState) int {
-	p.plisApi.Help()
+	p.plisAPI.Help()
 	return 1
 }
-func NewPlisModule(flags *lua.LTable, args *lua.LTable, api *api.PlisApi) *PlisModule {
+func NewPlisModule(flags *lua.LTable, args *lua.LTable, api *api.PlisAPI) *PlisModule {
 	return &PlisModule{
-		plisApi: api,
+		plisAPI: api,
 		flags:   flags,
 		args:    args,
 	}

@@ -5,28 +5,28 @@ import (
 	"os"
 )
 
-type FsApi struct {
+type FsAPI struct {
 	fs afero.Fs
 }
 
-func (f *FsApi) ReadFile(path string) (string, error) {
+func (f *FsAPI) ReadFile(path string) (string, error) {
 	d, err := afero.ReadFile(f.fs, path)
 	return string(d), err
 }
 
-func (f *FsApi) WriteFile(path string, data string) error {
+func (f *FsAPI) WriteFile(path string, data string) error {
 	return afero.WriteFile(f.fs, path, []byte(data), os.ModePerm)
 }
 
-func (f *FsApi) Mkdir(path string) error {
+func (f *FsAPI) Mkdir(path string) error {
 	return f.fs.Mkdir(path, os.ModePerm)
 }
 
-func (f *FsApi) MkdirAll(path string) error {
+func (f *FsAPI) MkdirAll(path string) error {
 	return f.fs.MkdirAll(path, os.ModePerm)
 }
-func NewFsApi(fs afero.Fs) *FsApi {
-	return &FsApi{
+func NewFsAPI(fs afero.Fs) *FsAPI {
+	return &FsAPI{
 		fs: fs,
 	}
 }

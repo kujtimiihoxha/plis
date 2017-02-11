@@ -22,7 +22,7 @@ type jsonValue struct {
 }
 
 func (j jsonValue) MarshalJSON() ([]byte, error) {
-	return ToJson(j.LValue, j.visited, j.marshallFunc)
+	return ToJSON(j.LValue, j.visited, j.marshallFunc)
 }
 func ToGoValue(lv lua.LValue) interface{} {
 	switch v := lv.(type) {
@@ -43,18 +43,17 @@ func ToGoValue(lv lua.LValue) interface{} {
 				ret[ToCamelCaseOrUnderscore(keystr)] = ToGoValue(value)
 			})
 			return ret
-		} else { // array
-			ret := make([]interface{}, 0, maxn)
-			for i := 1; i <= maxn; i++ {
-				ret = append(ret, ToGoValue(v.RawGetInt(i)))
-			}
-			return ret
 		}
+		ret := make([]interface{}, 0, maxn)
+		for i := 1; i <= maxn; i++ {
+			ret = append(ret, ToGoValue(v.RawGetInt(i)))
+		}
+		return ret
 	default:
 		return v
 	}
 }
-func ToJson(value lua.LValue, visited map[*lua.LTable]bool, marshallFunc func(v interface{}) ([]byte, error)) (data []byte, err error) {
+func ToJSON(value lua.LValue, visited map[*lua.LTable]bool, marshallFunc func(v interface{}) ([]byte, error)) (data []byte, err error) {
 	switch converted := value.(type) {
 	case lua.LBool:
 		data, err = marshallFunc(converted)
@@ -114,7 +113,7 @@ func ToJson(value lua.LValue, visited map[*lua.LTable]bool, marshallFunc func(v 
 	}
 	return
 }
-func FromJson(L *lua.LState, value interface{}) lua.LValue {
+func FromJSON(L *lua.LState, value interface{}) lua.LValue {
 	switch converted := value.(type) {
 	case bool:
 		return lua.LBool(converted)
@@ -125,13 +124,13 @@ func FromJson(L *lua.LState, value interface{}) lua.LValue {
 	case []interface{}:
 		arr := L.CreateTable(len(converted), 0)
 		for _, item := range converted {
-			arr.Append(FromJson(L, item))
+			arr.Append(FromJSON(L, item))
 		}
 		return arr
 	case map[string]interface{}:
 		tbl := L.CreateTable(0, len(converted))
 		for key, item := range converted {
-			tbl.RawSetH(lua.LString(key), FromJson(L, item))
+			tbl.RawSetH(lua.LString(key), FromJSON(L, item))
 		}
 		return tbl
 	}

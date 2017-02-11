@@ -7,7 +7,7 @@ import (
 )
 
 type TemplatesModule struct {
-	templatesApi *api.TemplateApi
+	templatesAPI *api.TemplateAPI
 }
 
 func (t *TemplatesModule) copyTemplate(L *lua.LState) int {
@@ -18,7 +18,7 @@ func (t *TemplatesModule) copyTemplate(L *lua.LState) int {
 	tplModel.ForEach(func(key lua.LValue, value lua.LValue) {
 		model[helpers.ToCamelCaseOrUnderscore(helpers.ToGoValue(key).(string))] = helpers.ToGoValue(value)
 	})
-	err := t.templatesApi.CopyTemplate(tplName, tplDestination, model)
+	err := t.templatesAPI.CopyTemplate(tplName, tplDestination, model)
 	if err != nil {
 		L.RaiseError("Could not copy template : '%s'", err)
 		return 0
@@ -40,7 +40,7 @@ func (t *TemplatesModule) copyTemplateFolder(L *lua.LState) int {
 	tplModel.ForEach(func(key lua.LValue, value lua.LValue) {
 		model[helpers.ToCamelCaseOrUnderscore(helpers.ToGoValue(key).(string))] = helpers.ToGoValue(value)
 	})
-	err := t.templatesApi.CopyTemplateFolder(tplFolder, tplDestination, model, exFiles)
+	err := t.templatesAPI.CopyTemplateFolder(tplFolder, tplDestination, model, exFiles)
 	if err != nil {
 		L.RaiseError("Could not copy template : '%s'", err)
 		return 0
@@ -61,8 +61,8 @@ func (t *TemplatesModule) InitializeModule() map[string]lua.LGFunction {
 	}
 }
 
-func NewTemplatesModule(templatesApi *api.TemplateApi) *TemplatesModule {
+func NewTemplatesModule(templatesAPI *api.TemplateAPI) *TemplatesModule {
 	return &TemplatesModule{
-		templatesApi: templatesApi,
+		templatesAPI: templatesAPI,
 	}
 }

@@ -27,13 +27,13 @@ func (lr *Runtime) Initialize(cmd *cobra.Command, args map[string]string, c conf
 	argsTb := glua.LTable{}
 	getArguments(&argsTb, c.Args, args)
 	lr.l = glua.NewState()
-	lr.l.PreloadModule("plis", modules.NewPlisModule(&flags, &argsTb, api.NewPlisApi(lr.cmd)).ModuleLoader())
-	lr.l.PreloadModule("fileSystem", modules.NewFileSystemModule(api.NewFsApi(fs.GetCurrentFs())).ModuleLoader())
-	lr.l.PreloadModule("json", modules.NewJsonModule().ModuleLoader())
+	lr.l.PreloadModule("plis", modules.NewPlisModule(&flags, &argsTb, api.NewPlisAPI(lr.cmd)).ModuleLoader())
+	lr.l.PreloadModule("fileSystem", modules.NewFileSystemModule(api.NewFsAPI(fs.GetCurrentFs())).ModuleLoader())
+	lr.l.PreloadModule("json", modules.NewJSONModule().ModuleLoader())
 	lr.l.PreloadModule("templates", modules.NewTemplatesModule(
-		api.NewTemplatesApi(
-			api.NewFsApi(afero.NewBasePathFs(lr.fs, "templates")),
-			api.NewFsApi(fs.GetCurrentFs()),
+		api.NewTemplatesAPI(
+			api.NewFsAPI(afero.NewBasePathFs(lr.fs, "templates")),
+			api.NewFsAPI(fs.GetCurrentFs()),
 		),
 	).ModuleLoader())
 	return lr

@@ -6,16 +6,16 @@ import (
 	"github.com/yuin/gopher-lua"
 )
 
-type JsonModule struct{}
+type JSONModule struct{}
 
-func (j *JsonModule) ModuleLoader() func(L *lua.LState) int {
+func (j *JSONModule) ModuleLoader() func(L *lua.LState) int {
 	return func(L *lua.LState) int {
 		mod := L.SetFuncs(L.NewTable(), j.InitializeModule())
 		L.Push(mod)
 		return 1
 	}
 }
-func (j *JsonModule) InitializeModule() map[string]lua.LGFunction {
+func (j *JSONModule) InitializeModule() map[string]lua.LGFunction {
 	return map[string]lua.LGFunction{
 		"encode":  j.encode,
 		"encodeF": j.encodeF,
@@ -23,11 +23,11 @@ func (j *JsonModule) InitializeModule() map[string]lua.LGFunction {
 	}
 }
 
-func NewJsonModule() *JsonModule {
-	return &JsonModule{}
+func NewJSONModule() *JSONModule {
+	return &JSONModule{}
 }
 
-func (j *JsonModule) decode(L *lua.LState) int {
+func (j *JSONModule) decode(L *lua.LState) int {
 	str := L.CheckString(1)
 	var value interface{}
 	err := json.Unmarshal([]byte(str), &value)
@@ -36,13 +36,13 @@ func (j *JsonModule) decode(L *lua.LState) int {
 		L.RaiseError("Could not decode json : '%s'", err)
 		return 1
 	}
-	L.Push(helpers.FromJson(L, value))
+	L.Push(helpers.FromJSON(L, value))
 	return 1
 }
-func (j *JsonModule) encode(L *lua.LState) int {
+func (j *JSONModule) encode(L *lua.LState) int {
 	value := L.CheckAny(1)
 	visited := make(map[*lua.LTable]bool)
-	data, err := helpers.ToJson(value, visited, json.Marshal)
+	data, err := helpers.ToJSON(value, visited, json.Marshal)
 	if err != nil {
 		L.Push(lua.LNil)
 		L.RaiseError("Could not encode json : '%s'", err)
@@ -51,10 +51,10 @@ func (j *JsonModule) encode(L *lua.LState) int {
 	L.Push(lua.LString(string(data)))
 	return 1
 }
-func (j *JsonModule) encodeF(L *lua.LState) int {
+func (j *JSONModule) encodeF(L *lua.LState) int {
 	value := L.CheckAny(1)
 	visited := make(map[*lua.LTable]bool)
-	data, err := helpers.ToJson(value, visited, marshalFormat)
+	data, err := helpers.ToJSON(value, visited, marshalFormat)
 	if err != nil {
 		L.Push(lua.LNil)
 		L.RaiseError("Could not encode json : '%s'", err)

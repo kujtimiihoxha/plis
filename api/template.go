@@ -10,12 +10,12 @@ import (
 	"strings"
 )
 
-type TemplateApi struct {
-	templateFs *FsApi
-	currentFs  *FsApi
+type TemplateAPI struct {
+	templateFs *FsAPI
+	currentFs  *FsAPI
 }
 
-func (t *TemplateApi) CopyTemplate(name string, destination string, model map[string]interface{}) error {
+func (t *TemplateAPI) CopyTemplate(name string, destination string, model map[string]interface{}) error {
 	v, err := t.templateFs.ReadFile(name)
 	if err != nil {
 		return err
@@ -42,7 +42,7 @@ func (t *TemplateApi) CopyTemplate(name string, destination string, model map[st
 	return nil
 }
 
-func (t *TemplateApi) CopyTemplateFolder(folder string, destination string, model map[string]interface{}, excludes []string) error {
+func (t *TemplateAPI) CopyTemplateFolder(folder string, destination string, model map[string]interface{}, excludes []string) error {
 	if destination != "" {
 		b, err := afero.Exists(t.currentFs.fs, destination)
 		if err != nil {
@@ -85,8 +85,8 @@ func (t *TemplateApi) CopyTemplateFolder(folder string, destination string, mode
 	}
 	return nil
 }
-func NewTemplatesApi(templateFs *FsApi, currentFs *FsApi) *TemplateApi {
-	return &TemplateApi{
+func NewTemplatesAPI(templateFs *FsAPI, currentFs *FsAPI) *TemplateAPI {
+	return &TemplateAPI{
 		templateFs: templateFs,
 		currentFs:  currentFs,
 	}
