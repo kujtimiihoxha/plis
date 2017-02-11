@@ -11,6 +11,7 @@ import (
 	"github.com/kujtimiihoxha/plis/helpers"
 	"github.com/kujtimiihoxha/plis/logger"
 	"github.com/kujtimiihoxha/plis/runtime"
+	"github.com/kujtimiihoxha/plis/runtime/lua"
 	"github.com/spf13/afero"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
@@ -128,9 +129,9 @@ func createCommand(c config.GeneratorConfig, gFs afero.Fs) *cobra.Command {
 	genCmd.SetHelpTemplate(getUsageTemplate())
 	switch c.ScriptType {
 	case "lua":
-		runtime.AddRuntime(genCmd, c, runtime.LuaRuntime{}, gFs)
+		runtime.AddRuntime(genCmd, c, lua.NewLuaRuntime(gFs))
 	default:
-		runtime.AddRuntime(genCmd, c, runtime.LuaRuntime{}, gFs)
+		runtime.AddRuntime(genCmd, c, lua.NewLuaRuntime(gFs))
 	}
 	return genCmd
 }

@@ -35,6 +35,9 @@ func GetCurrentFs() afero.Fs {
 		initialize()
 	}
 	if viper.GetBool("plis.is_generator_project") {
+		if viper.GetString("plis.debug_folder") != "" {
+			return afero.NewBasePathFs(generatorTestDir, viper.GetString("plis.debug_folder"))
+		}
 		return generatorTestDir
 	}
 	return currentFs
@@ -42,8 +45,4 @@ func GetCurrentFs() afero.Fs {
 
 func SetGeneratorTestFs(fs afero.Fs) {
 	generatorTestDir = fs
-}
-
-func GetGeneratorTestFs() afero.Fs {
-	return generatorTestDir
 }

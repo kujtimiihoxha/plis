@@ -39,6 +39,8 @@ func main() {
 }
 func initFirstRun() {
 	cmd.RootCmd.PersistentFlags().BoolP("debug", "d", false, "Is plis debugging")
+	cmd.RootCmd.PersistentFlags().String("debug_folder", "", "Root folder of the debug mode")
+	viper.BindPFlag("plis.debug_folder", cmd.RootCmd.PersistentFlags().Lookup("debug_folder"))
 	var err error
 	if _, err = os.Stat(viper.GetString("plis.dir.root")); err == nil {
 		return
