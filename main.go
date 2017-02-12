@@ -58,10 +58,6 @@ func initFirstRun() {
 		if err != nil {
 			logger.GetLogger().Fatal(err)
 		}
-		err = os.Mkdir(viper.GetString("plis.dir.generators"), os.ModePerm)
-		if err != nil {
-			logger.GetLogger().Fatal(err)
-		}
 		return
 	}
 	logger.GetLogger().Fatal(err)
