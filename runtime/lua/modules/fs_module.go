@@ -22,6 +22,8 @@ func (fsm *FileSystemModule) InitializeModule() map[string]lua.LGFunction {
 		"writeFile": fsm.writeFile,
 		"mkdir":     fsm.mkdir,
 		"mkdirAll":  fsm.mkdirAll,
+		"fileSeparator":  fsm.fileSeparator,
+		"exists":  fsm.exists,
 	}
 }
 
@@ -51,6 +53,11 @@ func (fsm *FileSystemModule) exists(L *lua.LState) int {
 		return 1
 	}
 	L.Push(lua.LBool(v))
+	return 1
+}
+func (fsm *FileSystemModule) fileSeparator(L *lua.LState) int {
+	v := fsm.fsAPI.FileSeparator()
+	L.Push(lua.LString(v))
 	return 1
 }
 func (fsm *FileSystemModule) writeFile(L *lua.LState) int {
