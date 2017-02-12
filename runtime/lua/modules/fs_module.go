@@ -42,6 +42,17 @@ func (fsm *FileSystemModule) readFile(L *lua.LState) int {
 	L.Push(lua.LString(v))
 	return 1
 }
+func (fsm *FileSystemModule) exists(L *lua.LState) int {
+	fName := L.CheckString(1)
+	v, err := fsm.fsAPI.Exists(fName)
+	if err != nil {
+		L.RaiseError("Could not check if file exists : '%s'", err)
+		L.Push(lua.LNil)
+		return 1
+	}
+	L.Push(lua.LBool(v))
+	return 1
+}
 func (fsm *FileSystemModule) writeFile(L *lua.LState) int {
 	path := L.CheckString(1)
 	data := L.CheckString(2)

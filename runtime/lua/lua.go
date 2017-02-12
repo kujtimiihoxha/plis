@@ -12,6 +12,8 @@ import (
 	"github.com/spf13/pflag"
 	glua "github.com/yuin/gopher-lua"
 	"strconv"
+	"fmt"
+	"github.com/spf13/viper"
 )
 
 type Runtime struct {
@@ -45,7 +47,13 @@ func (lr *Runtime) Run() error {
 		return err
 	}
 	defer lr.l.Close()
-	if err := lr.l.DoString(string(d)); err != nil {
+	script := fmt.Sprintf(
+		"package.path =\"%s\" .. [[/?.lua]]",
+		viper.GetString(fmt.Sprintf("plis.generators.%s.root",lr.cmd.Name()),
+	))
+	script += "\n" + string(d)
+	fmt.Print(script)
+	if err := lr.l.DoString(script); err != nil {
 		logger.GetLogger().Fatal(err)
 	}
 	if err := lr.l.CallByParam(glua.P{

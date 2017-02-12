@@ -47,11 +47,36 @@ func find() (globalGenerators []string, projectGenerators []string) {
 func Initialize() {
 	globalGenerators, projectGenerators := find()
 	for _, v := range globalGenerators {
-		gFs := afero.NewBasePathFs(fs.GetPlisRootFs(), fmt.Sprintf("generators%splis-%s", afero.FilePathSeparator, v))
+		gFs := afero.NewBasePathFs(
+			fs.GetPlisRootFs(),
+			fmt.Sprintf("generators%splis-%s", afero.FilePathSeparator, v),
+		)
+		viper.Set(
+			fmt.Sprintf("plis.generators.%s.root", v),
+			fmt.Sprintf(
+				"%s%sgenerators%splis-%s",
+				viper.GetString("plis.dir.root"),
+				afero.FilePathSeparator,
+				afero.FilePathSeparator,
+				v,
+			),
+		)
 		createGeneratorCmd(gFs, cmd.RootCmd, v)
 	}
 	for _, v := range projectGenerators {
-		gFs := afero.NewBasePathFs(fs.GetCurrentFs(), fmt.Sprintf("plis%sgenerators%plis-%s", afero.FilePathSeparator, afero.FilePathSeparator, v))
+		gFs := afero.NewBasePathFs(fs.GetCurrentFs(), fmt.Sprintf("plis%sgenerators%splis-%s", afero.FilePathSeparator, afero.FilePathSeparator, v))
+		dr, _ := os.Getwd()
+		viper.Set(
+			fmt.Sprintf("plis.generators.%s.root", v),
+			fmt.Sprintf(
+				"%s%splis%sgenerators%splis-%s",
+				dr,
+				afero.FilePathSeparator,
+				afero.FilePathSeparator,
+				afero.FilePathSeparator,
+				v,
+			),
+		)
 		createGeneratorCmd(gFs, cmd.RootCmd, v)
 	}
 	checkIfGeneratorProject()
@@ -215,6 +240,13 @@ func checkIfGeneratorProject() {
 	currentFs := fs.GetCurrentFs()
 	fs.SetGeneratorTestFs(afero.NewBasePathFs(currentFs, c.TestDir))
 	viper.Set("plis.generator_project_name", c.GeneratorName)
+	dr, _ := os.Getwd()
+	viper.Set(
+		fmt.Sprintf("plis.generators.%s.root", c.GeneratorName),
+		fmt.Sprintf(
+			dr,
+		),
+	)
 	createGeneratorCmd(currentFs, cmd.RootCmd, c.GeneratorName)
 
 }

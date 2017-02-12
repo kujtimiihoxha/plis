@@ -27,6 +27,8 @@ import (
 	"os"
 	"os/user"
 	"path/filepath"
+	"github.com/spf13/afero"
+	"os/exec"
 )
 
 func main() {
@@ -38,6 +40,7 @@ func main() {
 	cmd.Execute()
 }
 func initFirstRun() {
+	checkGit()
 	cmd.RootCmd.PersistentFlags().BoolP("debug", "d", false, "Is plis debugging")
 	cmd.RootCmd.PersistentFlags().String("debug_folder", "", "Root folder of the debug mode")
 	viper.BindPFlag("plis.debug_folder", cmd.RootCmd.PersistentFlags().Lookup("debug_folder"))
@@ -51,7 +54,7 @@ func initFirstRun() {
 		logger.GetLogger().Info(fmt.Sprintf(
 			"Creating plis root in `%s`...",
 			viper.GetString("plis.dir.root")))
-		err := os.Mkdir(viper.GetString("plis.dir.root"), os.ModePerm)
+		err := os.MkdirAll(viper.GetString("plis.dir.root") + afero.FilePathSeparator + "generators", os.ModePerm)
 		if err != nil {
 			logger.GetLogger().Fatal(err)
 		}
@@ -62,6 +65,13 @@ func initFirstRun() {
 		return
 	}
 	logger.GetLogger().Fatal(err)
+}
+func checkGit() {
+	cmd := exec.Command("git","--version")
+	err:= cmd.Run()
+	if err != nil{
+		logger.GetLogger().Fatal("Plis needs git to be installed please install git and try again.")
+	}
 }
 func configDefaults() {
 	usr, err := user.Current()

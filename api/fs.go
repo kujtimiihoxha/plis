@@ -25,6 +25,12 @@ func (f *FsAPI) Mkdir(path string) error {
 func (f *FsAPI) MkdirAll(path string) error {
 	return f.fs.MkdirAll(path, os.ModePerm)
 }
+func (f *FsAPI) FileSeparator() string {
+	return afero.FilePathSeparator
+}
+func (f *FsAPI) Exists(path string) (bool, error) {
+	return afero.Exists( f.fs,path)
+}
 func NewFsAPI(fs afero.Fs) *FsAPI {
 	return &FsAPI{
 		fs: fs,
