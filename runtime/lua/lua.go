@@ -48,9 +48,11 @@ func (lr *Runtime) Run() error {
 	}
 	defer lr.l.Close()
 	script := fmt.Sprintf(
-		"package.path =\"%s\" .. [[/?.lua]]",
+		"package.path =\"%s\" .. [[%s?.lua]]",
 		viper.GetString(fmt.Sprintf("plis.generators.%s.root",lr.cmd.Name()),
-	))
+		),
+		afero.FilePathSeparator,
+	)
 	script += "\n" + string(d)
 	if err := lr.l.DoString(script); err != nil {
 		logger.GetLogger().Fatal(err)
