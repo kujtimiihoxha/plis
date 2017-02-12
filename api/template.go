@@ -16,8 +16,6 @@ type TemplateAPI struct {
 }
 
 func (t *TemplateAPI) CopyTemplate(name string, destination string, model map[string]interface{}) error {
-	name = strings.Replace(name,"\\",t.templateFs.FileSeparator(),-1)
-	destination = strings.Replace(destination,"\\",t.templateFs.FileSeparator(),-1)
 	v, err := t.templateFs.ReadFile(name)
 	if err != nil {
 		return err
@@ -45,8 +43,6 @@ func (t *TemplateAPI) CopyTemplate(name string, destination string, model map[st
 }
 
 func (t *TemplateAPI) CopyTemplateFolder(folder string, destination string, model map[string]interface{}, excludes []string) error {
-	folder = strings.Replace(folder,"\\",t.templateFs.FileSeparator(),-1)
-	destination = strings.Replace(destination,"\\",t.templateFs.FileSeparator(),-1)
 	if destination != "" {
 		b, err := afero.Exists(t.currentFs.fs, destination)
 		if err != nil {
@@ -62,6 +58,8 @@ func (t *TemplateAPI) CopyTemplateFolder(folder string, destination string, mode
 	}
 	err := afero.Walk(t.templateFs.fs, "", func(path string, info os.FileInfo, err error) error {
 		for _, v := range excludes {
+			v = strings.Replace(v,"/",t.templateFs.FileSeparator(),-1)
+			v = strings.Replace(v,"\\",t.templateFs.FileSeparator(),-1)
 			if glob.Glob(v, path) {
 				return nil
 			}
