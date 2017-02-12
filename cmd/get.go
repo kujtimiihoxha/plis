@@ -26,6 +26,7 @@ import (
 	"github.com/kujtimiihoxha/plis/api"
 	"github.com/kujtimiihoxha/plis/config"
 	"encoding/json"
+	"fmt"
 )
 
 // getCmd represents the get command
@@ -108,12 +109,12 @@ func checkIfGeneratorFolderExists() string{
 		return  viper.GetString("plis.dir.generators")
 	}
 	fsAPI := api.NewFsAPI(fs.GetCurrentFs())
-	b,err:=fsAPI.Exists("plis/generators")
+	b,err:=fsAPI.Exists(fmt.Sprintf("plis%sgenerators",fsAPI.FileSeparator()))
 	if err!= nil {
 		logger.GetLogger().Fatal(err)
 	}
 	if !b {
-		err = fsAPI.MkdirAll("plis/generators")
+		err = fsAPI.MkdirAll(fmt.Sprintf("plis%sgenerators",fsAPI.FileSeparator()))
 		if err!= nil {
 			logger.GetLogger().Fatal(err)
 		}
