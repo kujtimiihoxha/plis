@@ -1,6 +1,7 @@
 package lua
 
 import (
+	"fmt"
 	"github.com/kujtimiihoxha/plis/api"
 	"github.com/kujtimiihoxha/plis/config"
 	"github.com/kujtimiihoxha/plis/fs"
@@ -10,10 +11,9 @@ import (
 	"github.com/spf13/afero"
 	"github.com/spf13/cobra"
 	"github.com/spf13/pflag"
+	"github.com/spf13/viper"
 	glua "github.com/yuin/gopher-lua"
 	"strconv"
-	"fmt"
-	"github.com/spf13/viper"
 )
 
 type Runtime struct {
@@ -49,8 +49,7 @@ func (lr *Runtime) Run() error {
 	defer lr.l.Close()
 	script := fmt.Sprintf(
 		"package.path =\"%s\" .. [[%s?.lua]]",
-		viper.GetString(fmt.Sprintf("plis.generators.%s.root",lr.cmd.Name()),
-		),
+		viper.GetString(fmt.Sprintf("plis.generators.%s.root", lr.cmd.Name())),
 		afero.FilePathSeparator,
 	)
 	script += "\n" + string(d)

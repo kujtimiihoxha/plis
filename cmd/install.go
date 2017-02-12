@@ -15,19 +15,19 @@
 package cmd
 
 import (
-	"github.com/spf13/cobra"
-	"github.com/kujtimiihoxha/plis/fs"
-	"github.com/kujtimiihoxha/plis/logger"
-	"github.com/kujtimiihoxha/plis/config"
 	"encoding/json"
 	"github.com/kujtimiihoxha/plis/api"
+	"github.com/kujtimiihoxha/plis/config"
+	"github.com/kujtimiihoxha/plis/fs"
+	"github.com/kujtimiihoxha/plis/logger"
+	"github.com/spf13/cobra"
 )
 
 // installCmd represents the install command
 var installCmd = &cobra.Command{
 	Use:   "install",
 	Short: "Install all the plis dependencies",
-	Long: `Install all the plis dependencies`,
+	Long:  `Install all the plis dependencies`,
 	Run: func(cmd *cobra.Command, args []string) {
 		installDependencies()
 	},
@@ -35,17 +35,17 @@ var installCmd = &cobra.Command{
 
 func installDependencies() {
 	fsApi := api.NewFsAPI(fs.GetCurrentFs())
-	data,err:=fsApi.ReadFile("plis.json")
+	data, err := fsApi.ReadFile("plis.json")
 	if err != nil {
 		logger.GetLogger().Fatal("Could not read pplis configuration file : ", err)
 	}
 	plisConfig := config.PlisConfig{}
-	err = json.Unmarshal([]byte(data),&plisConfig)
+	err = json.Unmarshal([]byte(data), &plisConfig)
 	if err != nil {
 		logger.GetLogger().Fatal("Could not decode plis configurations : ", err)
 	}
-	for _,v := range plisConfig.Dependencies{
-		getGenerator(v.Repository,v.Branch)
+	for _, v := range plisConfig.Dependencies {
+		getGenerator(v.Repository, v.Branch)
 	}
 }
 

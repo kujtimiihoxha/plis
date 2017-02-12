@@ -23,12 +23,12 @@ import (
 	"github.com/kujtimiihoxha/plis/generators"
 	"github.com/kujtimiihoxha/plis/helpers"
 	"github.com/kujtimiihoxha/plis/logger"
+	"github.com/spf13/afero"
 	"github.com/spf13/viper"
 	"os"
+	"os/exec"
 	"os/user"
 	"path/filepath"
-	"github.com/spf13/afero"
-	"os/exec"
 )
 
 func main() {
@@ -54,7 +54,7 @@ func initFirstRun() {
 		logger.GetLogger().Info(fmt.Sprintf(
 			"Creating plis root in `%s`...",
 			viper.GetString("plis.dir.root")))
-		err := os.MkdirAll(viper.GetString("plis.dir.root") + afero.FilePathSeparator + "generators", os.ModePerm)
+		err := os.MkdirAll(viper.GetString("plis.dir.root")+afero.FilePathSeparator+"generators", os.ModePerm)
 		if err != nil {
 			logger.GetLogger().Fatal(err)
 		}
@@ -63,9 +63,9 @@ func initFirstRun() {
 	logger.GetLogger().Fatal(err)
 }
 func checkGit() {
-	cmd := exec.Command("git","--version")
-	err:= cmd.Run()
-	if err != nil{
+	cmd := exec.Command("git", "--version")
+	err := cmd.Run()
+	if err != nil {
 		logger.GetLogger().Fatal("Plis needs git to be installed please install git and try again.")
 	}
 }
