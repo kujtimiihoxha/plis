@@ -64,6 +64,21 @@ func Initialize() {
 		createGeneratorCmd(gFs, cmd.RootCmd, v)
 	}
 	for _, v := range projectGenerators {
+		if v == "get" || v == "install" || v == "init"{
+			logger.GetLogger().Warnf("The commandd '%s' is a build in command so it can not be used",v)
+			continue
+		}
+		toRemove := []*cobra.Command{}
+		for _,gcmd := range cmd.RootCmd.Commands() {
+			if gcmd.Name() == v {
+				logger.GetLogger().Warnf(
+					"The commandd '%s' exists as a global command it will be replaced by the project level command",
+					v,
+				)
+				toRemove = append(toRemove,gcmd)
+			}
+		}
+		cmd.RootCmd.RemoveCommand(toRemove...)
 		gFs := afero.NewBasePathFs(fs.GetCurrentFs(), fmt.Sprintf("plis%sgenerators%splis-%s", afero.FilePathSeparator, afero.FilePathSeparator, v))
 		dr, _ := os.Getwd()
 		viper.Set(

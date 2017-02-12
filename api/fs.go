@@ -3,7 +3,6 @@ package api
 import (
 	"github.com/spf13/afero"
 	"os"
-	"strings"
 )
 
 type FsAPI struct {
