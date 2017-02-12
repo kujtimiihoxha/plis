@@ -52,7 +52,6 @@ func (lr *Runtime) Run() error {
 		viper.GetString(fmt.Sprintf("plis.generators.%s.root",lr.cmd.Name()),
 	))
 	script += "\n" + string(d)
-	fmt.Print(script)
 	if err := lr.l.DoString(script); err != nil {
 		logger.GetLogger().Fatal(err)
 	}
