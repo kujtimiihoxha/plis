@@ -18,12 +18,12 @@ func (fsm *FileSystemModule) ModuleLoader() func(L *lua.LState) int {
 }
 func (fsm *FileSystemModule) InitializeModule() map[string]lua.LGFunction {
 	return map[string]lua.LGFunction{
-		"readFile":  fsm.readFile,
-		"writeFile": fsm.writeFile,
-		"mkdir":     fsm.mkdir,
-		"mkdirAll":  fsm.mkdirAll,
-		"fileSeparator":  fsm.fileSeparator,
-		"exists":  fsm.exists,
+		"readFile":      fsm.readFile,
+		"writeFile":     fsm.writeFile,
+		"mkdir":         fsm.mkdir,
+		"mkdirAll":      fsm.mkdirAll,
+		"fileSeparator": fsm.fileSeparator,
+		"exists":        fsm.exists,
 	}
 }
 

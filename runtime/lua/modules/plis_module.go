@@ -1,7 +1,10 @@
 package modules
 
 import (
+	"fmt"
 	"github.com/kujtimiihoxha/plis/api"
+	"github.com/kujtimiihoxha/plis/cmd"
+	"github.com/kujtimiihoxha/plis/helpers"
 	"github.com/yuin/gopher-lua"
 )
 
@@ -22,12 +25,33 @@ func (p *PlisModule) ModuleLoader() func(L *lua.LState) int {
 }
 func (p *PlisModule) InitializeModule() map[string]lua.LGFunction {
 	return map[string]lua.LGFunction{
-		"help": p.help,
+		"help":       p.help,
+		"runPlisCmd": p.runPlisCmd,
 	}
 }
 func (p *PlisModule) help(L *lua.LState) int {
 	p.plisAPI.Help()
-	return 1
+	return 0
+}
+func (p *PlisModule) runPlisCmd(L *lua.LState) int {
+	c := L.CheckString(1)
+	args := L.CheckAny(2)
+	v, ok := helpers.ToGoValue(args).([]interface{})
+	if !ok {
+		L.RaiseError("The arguments must be an array")
+		return 0
+	}
+	s := []string{
+		c,
+	}
+	for _, a := range v {
+		s = append(s, fmt.Sprint(a))
+	}
+	cmd.RootCmd.SetArgs(s)
+	if err := cmd.RootCmd.Execute(); err != nil {
+		L.RaiseError(err.Error())
+	}
+	return 0
 }
 func NewPlisModule(flags *lua.LTable, args *lua.LTable, api *api.PlisAPI) *PlisModule {
 	return &PlisModule{

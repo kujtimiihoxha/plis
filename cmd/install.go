@@ -15,37 +15,49 @@
 package cmd
 
 import (
-	"github.com/spf13/cobra"
+	"encoding/json"
+	"fmt"
+	"github.com/kujtimiihoxha/plis/api"
+	"github.com/kujtimiihoxha/plis/config"
 	"github.com/kujtimiihoxha/plis/fs"
 	"github.com/kujtimiihoxha/plis/logger"
-	"github.com/kujtimiihoxha/plis/config"
-	"encoding/json"
-	"github.com/kujtimiihoxha/plis/api"
+	"github.com/spf13/afero"
+	"github.com/spf13/cobra"
 )
 
 // installCmd represents the install command
 var installCmd = &cobra.Command{
 	Use:   "install",
 	Short: "Install all the plis dependencies",
-	Long: `Install all the plis dependencies`,
+	Long:  `Install all the plis dependencies`,
 	Run: func(cmd *cobra.Command, args []string) {
-		installDependencies()
+		installDependencies(false, "")
 	},
 }
 
-func installDependencies() {
+func installDependencies(global bool, path string) {
+	fmt.Println(path)
 	fsApi := api.NewFsAPI(fs.GetCurrentFs())
-	data,err:=fsApi.ReadFile("plis.json")
+	if path != "" {
+		if !global {
+			fsApi = api.NewFsAPI(afero.NewBasePathFs(fs.GetCurrentFs(), path))
+		}
+		fsApi = api.NewFsAPI(afero.NewBasePathFs(afero.NewOsFs(), path))
+
+	}
+	data, err := fsApi.ReadFile("plis.json")
 	if err != nil {
-		logger.GetLogger().Fatal("Could not read pplis configuration file : ", err)
+		logger.GetLogger().Error("Could not read plis configuration file : ", err)
+		return
 	}
 	plisConfig := config.PlisConfig{}
-	err = json.Unmarshal([]byte(data),&plisConfig)
+	err = json.Unmarshal([]byte(data), &plisConfig)
 	if err != nil {
-		logger.GetLogger().Fatal("Could not decode plis configurations : ", err)
+		logger.GetLogger().Error("Could not decode plis configurations : ", err)
+		return
 	}
-	for _,v := range plisConfig.Dependencies{
-		getGenerator(v.Repository,v.Branch)
+	for _, v := range plisConfig.Dependencies {
+		getGenerator(v.Repository, v.Branch)
 	}
 }
 

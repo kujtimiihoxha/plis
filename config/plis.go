@@ -5,5 +5,5 @@ type PlisConfig struct {
 }
 type PlisDependency struct {
 	Repository string `json:"rep"`
-	Branch string `json:"branch"`
+	Branch     string `json:"branch"`
 }

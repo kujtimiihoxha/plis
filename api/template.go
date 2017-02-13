@@ -58,8 +58,8 @@ func (t *TemplateAPI) CopyTemplateFolder(folder string, destination string, mode
 	}
 	err := afero.Walk(t.templateFs.fs, "", func(path string, info os.FileInfo, err error) error {
 		for _, v := range excludes {
-			v = strings.Replace(v,"/",t.templateFs.FileSeparator(),-1)
-			v = strings.Replace(v,"\\",t.templateFs.FileSeparator(),-1)
+			v = strings.Replace(v, "/", t.templateFs.FileSeparator(), -1)
+			v = strings.Replace(v, "\\", t.templateFs.FileSeparator(), -1)
 			if glob.Glob(v, path) {
 				return nil
 			}
