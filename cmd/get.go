@@ -44,23 +44,24 @@ func getGenerator(rep string, branch string) {
 	repository := strings.Split(rep, "/")
 	gen := repository[len(repository)-1]
 	gen = strings.TrimSuffix(gen, ".git")
-	b,_:=afero.Exists(fs.GetCurrentFs(),dir + afero.FilePathSeparator + gen)
+	b, _ := afero.Exists(fs.GetCurrentFs(), dir+afero.FilePathSeparator+gen)
 	if b {
-		logger.GetLogger().Fatal("A generator with the same name already exists")
+		logger.GetLogger().Warn("A generator with the same name already exists")
+		return
 	}
 	dir += afero.FilePathSeparator + gen
-	cmdArgs := []string{
+	Args := []string{
 		"clone",
 	}
 	if branch != "" {
-		cmdArgs = append(cmdArgs, "-b", branch, "--single-branch")
+		Args = append(Args, "-b", branch, "--single-branch")
 	}
-	cmdArgs = append(cmdArgs, rep, dir)
-	cmd := exec.Command("git", cmdArgs...)
-	cmd.Stdout = os.Stdout
-	cmd.Stdin = os.Stdin
-	cmd.Stderr = os.Stderr
-	err := cmd.Run()
+	Args = append(Args, rep, dir)
+	_cmd := exec.Command("git", Args...)
+	_cmd.Stdout = os.Stdout
+	_cmd.Stdin = os.Stdin
+	_cmd.Stderr = os.Stderr
+	err := _cmd.Run()
 	if err != nil {
 		logger.GetLogger().Error(err)
 	}
@@ -85,24 +86,30 @@ func getGenerator(rep string, branch string) {
 			}
 			data, _ := json.MarshalIndent(pc, "", "    ")
 			fsAPI.WriteFile("plis.json", string(data))
-			return
-		}
-		data, err := fsAPI.ReadFile("plis.json")
-		pc := config.PlisConfig{}
-		json.Unmarshal([]byte(data), &pc)
-		exists := false
-		for _,v := range pc.Dependencies {
-			if v.Repository == pd.Repository {
-				exists = true
+		} else {
+			data, _ := fsAPI.ReadFile("plis.json")
+			pc := config.PlisConfig{}
+			json.Unmarshal([]byte(data), &pc)
+			exists := false
+			for _, v := range pc.Dependencies {
+				if v.Repository == pd.Repository {
+					exists = true
+				}
+			}
+			if !exists {
+				pc.Dependencies = append(pc.Dependencies, pd)
+				d, _ := json.MarshalIndent(pc, "", "    ")
+				fsAPI.WriteFile("plis.json", string(d))
 			}
 		}
-		if !exists {
-			pc.Dependencies = append(pc.Dependencies, pd)
-			d, _ := json.MarshalIndent(pc, "", "    ")
-			fsAPI.WriteFile("plis.json", string(d))
-		}
 	}
-
+	_fs := afero.NewBasePathFs(fs.GetCurrentFs(), dir)
+	if viper.GetBool("plis.get.global") {
+		_fs = afero.NewBasePathFs(afero.NewOsFs(), dir)
+	}
+	if b, _ := afero.Exists(_fs, "plis.json"); b {
+		installDependencies(viper.GetBool("plis.get.global"), dir)
+	}
 }
 func checkIfGeneratorFolderExists() string {
 	if viper.GetBool("plis.get.global") {

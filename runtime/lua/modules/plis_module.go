@@ -1,11 +1,11 @@
 package modules
 
 import (
-	"github.com/kujtimiihoxha/plis/api"
-	"github.com/yuin/gopher-lua"
-	"github.com/kujtimiihoxha/plis/helpers"
-	"github.com/kujtimiihoxha/plis/cmd"
 	"fmt"
+	"github.com/kujtimiihoxha/plis/api"
+	"github.com/kujtimiihoxha/plis/cmd"
+	"github.com/kujtimiihoxha/plis/helpers"
+	"github.com/yuin/gopher-lua"
 )
 
 type PlisModule struct {
@@ -25,7 +25,7 @@ func (p *PlisModule) ModuleLoader() func(L *lua.LState) int {
 }
 func (p *PlisModule) InitializeModule() map[string]lua.LGFunction {
 	return map[string]lua.LGFunction{
-		"help": p.help,
+		"help":       p.help,
 		"runPlisCmd": p.runPlisCmd,
 	}
 }
@@ -36,7 +36,7 @@ func (p *PlisModule) help(L *lua.LState) int {
 func (p *PlisModule) runPlisCmd(L *lua.LState) int {
 	c := L.CheckString(1)
 	args := L.CheckAny(2)
-	v,ok := helpers.ToGoValue(args).([]interface{})
+	v, ok := helpers.ToGoValue(args).([]interface{})
 	if !ok {
 		L.RaiseError("The arguments must be an array")
 		return 0
@@ -44,8 +44,8 @@ func (p *PlisModule) runPlisCmd(L *lua.LState) int {
 	s := []string{
 		c,
 	}
-	for _,a := range v {
-		s = append(s,fmt.Sprint(a))
+	for _, a := range v {
+		s = append(s, fmt.Sprint(a))
 	}
 	cmd.RootCmd.SetArgs(s)
 	if err := cmd.RootCmd.Execute(); err != nil {
