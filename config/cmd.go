@@ -23,6 +23,8 @@ type GeneratorConfig struct {
 type GeneratorProjectConfig struct {
 	GeneratorName string `json:"generator_name" valid:"required"`
 	TestDir       string `json:"test_dir" valid:"required"`
+	Dependencies []PlisDependency `json:"dependencies"`
+
 }
 type GeneratorFlag struct {
 	Name        string      `json:"name" valid:"required"`

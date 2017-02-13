@@ -35,7 +35,7 @@ var getCmd = &cobra.Command{
 	Short: "Get a generator from a git repository",
 	Long:  `Get a generator from a git repository`,
 	Run: func(cmd *cobra.Command, args []string) {
-		getGenerator(args[0], viper.GetString("get.branch"))
+		getGenerator(args[0], viper.GetString("plis.get.branch"))
 	},
 }
 
@@ -44,6 +44,10 @@ func getGenerator(rep string, branch string) {
 	repository := strings.Split(rep, "/")
 	gen := repository[len(repository)-1]
 	gen = strings.TrimSuffix(gen, ".git")
+	b,_:=afero.Exists(fs.GetCurrentFs(),dir + afero.FilePathSeparator + gen)
+	if b {
+		logger.GetLogger().Fatal("A generator with the same name already exists")
+	}
 	dir += afero.FilePathSeparator + gen
 	cmdArgs := []string{
 		"clone",
@@ -60,7 +64,7 @@ func getGenerator(rep string, branch string) {
 	if err != nil {
 		logger.GetLogger().Error(err)
 	}
-	if !viper.GetBool("get.global") {
+	if !viper.GetBool("plis.get.global") {
 		fsAPI := api.NewFsAPI(fs.GetCurrentFs())
 		b, err := fsAPI.Exists("plis.json")
 		if err != nil {
@@ -86,14 +90,22 @@ func getGenerator(rep string, branch string) {
 		data, err := fsAPI.ReadFile("plis.json")
 		pc := config.PlisConfig{}
 		json.Unmarshal([]byte(data), &pc)
-		pc.Dependencies = append(pc.Dependencies, pd)
-		d, _ := json.MarshalIndent(pc, "", "    ")
-		fsAPI.WriteFile("plis.json", string(d))
+		exists := false
+		for _,v := range pc.Dependencies {
+			if v.Repository == pd.Repository {
+				exists = true
+			}
+		}
+		if !exists {
+			pc.Dependencies = append(pc.Dependencies, pd)
+			d, _ := json.MarshalIndent(pc, "", "    ")
+			fsAPI.WriteFile("plis.json", string(d))
+		}
 	}
 
 }
 func checkIfGeneratorFolderExists() string {
-	if viper.GetBool("get.global") {
+	if viper.GetBool("plis.get.global") {
 		fsAPI := api.NewFsAPI(fs.GetPlisRootFs())
 		b, err := fsAPI.Exists("generators")
 		if err != nil {
@@ -124,7 +136,7 @@ func checkIfGeneratorFolderExists() string {
 func init() {
 	getCmd.Flags().BoolP("global", "g", false, "Use if the generator should be installed globally")
 	getCmd.Flags().StringP("branch", "b", "", "Use if you want to get a specific branch of the generator")
-	viper.BindPFlag("get.global", getCmd.Flags().Lookup("global"))
-	viper.BindPFlag("get.branch", getCmd.Flags().Lookup("branch"))
+	viper.BindPFlag("plis.get.global", getCmd.Flags().Lookup("global"))
+	viper.BindPFlag("plis.get.branch", getCmd.Flags().Lookup("branch"))
 	RootCmd.AddCommand(getCmd)
 }
