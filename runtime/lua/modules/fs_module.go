@@ -3,6 +3,7 @@ package modules
 import (
 	"github.com/kujtimiihoxha/plis/api"
 	"github.com/yuin/gopher-lua"
+	"fmt"
 )
 
 type FileSystemModule struct {
@@ -37,9 +38,9 @@ func (fsm *FileSystemModule) readFile(L *lua.LState) int {
 	fName := L.CheckString(1)
 	v, err := fsm.fsAPI.ReadFile(fName)
 	if err != nil {
-		L.RaiseError("Could not read file : '%s'", err)
 		L.Push(lua.LNil)
-		return 1
+		L.Push(lua.LString(fmt.Sprintf("Could not read file : '%s'", err)))
+		return 2
 	}
 	L.Push(lua.LString(v))
 	return 1
@@ -48,9 +49,9 @@ func (fsm *FileSystemModule) exists(L *lua.LState) int {
 	fName := L.CheckString(1)
 	v, err := fsm.fsAPI.Exists(fName)
 	if err != nil {
-		L.RaiseError("Could not check if file exists : '%s'", err)
 		L.Push(lua.LNil)
-		return 1
+		L.Push(lua.LString(fmt.Sprintf("Could not check if file exists : '%s'", err)))
+		return 2
 	}
 	L.Push(lua.LBool(v))
 	return 1
@@ -65,8 +66,8 @@ func (fsm *FileSystemModule) writeFile(L *lua.LState) int {
 	data := L.CheckString(2)
 	err := fsm.fsAPI.WriteFile(path, data)
 	if err != nil {
-		L.RaiseError("Could not write file : '%s'", err)
-		return 0
+		L.Push(lua.LString(fmt.Sprintf("Could not write file : '%s'", err)))
+		return 1
 	}
 	return 0
 }
@@ -74,8 +75,8 @@ func (fsm *FileSystemModule) mkdir(L *lua.LState) int {
 	path := L.CheckString(1)
 	err := fsm.fsAPI.Mkdir(path)
 	if err != nil {
-		L.RaiseError("Could not create directory file : '%s'", err)
-		return 0
+		L.Push(lua.LString(fmt.Sprintf("Could not create directory file : '%s'", err)))
+		return 1
 	}
 	return 0
 }
@@ -83,8 +84,8 @@ func (fsm *FileSystemModule) mkdirAll(L *lua.LState) int {
 	path := L.CheckString(1)
 	err := fsm.fsAPI.MkdirAll(path)
 	if err != nil {
-		L.RaiseError("Could not create directories file : '%s'", err)
-		return 0
+		L.Push(lua.LString(fmt.Sprintf("Could not create directories file : '%s'", err)))
+		return 1
 	}
 	return 0
 }

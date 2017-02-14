@@ -37,15 +37,16 @@ func (p *PlisModule) runPlisCmd(L *lua.LState) int {
 	args := L.CheckAny(2)
 	v, ok := helpers.ToGoValue(args).([]interface{})
 	if !ok {
-		L.RaiseError("The arguments must be an array")
-		return 0
+		L.Push(lua.LString("The arguments must be an array"))
+		return 1
 	}
 	s := []string{}
 	for _, a := range v {
 		s = append(s, fmt.Sprint(a))
 	}
 	if err := p.plisAPI.RunPlisCmd(pCmd,s); err != nil {
-		L.RaiseError(err.Error())
+		L.Push(lua.LString(err.Error()))
+		return 1
 	}
 	return 0
 }

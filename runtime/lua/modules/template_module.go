@@ -4,6 +4,7 @@ import (
 	"github.com/kujtimiihoxha/plis/api"
 	"github.com/kujtimiihoxha/plis/helpers"
 	"github.com/yuin/gopher-lua"
+	"fmt"
 )
 
 type TemplatesModule struct {
@@ -20,8 +21,8 @@ func (t *TemplatesModule) copyTemplate(L *lua.LState) int {
 	})
 	err := t.templatesAPI.CopyTemplate(tplName, tplDestination, model)
 	if err != nil {
-		L.RaiseError("Could not copy template : '%s'", err)
-		return 0
+		L.Push(lua.LString(fmt.Sprintf("Could not copy template : '%s'", err)))
+		return 1
 	}
 	return 0
 }
@@ -42,8 +43,8 @@ func (t *TemplatesModule) copyTemplateFolder(L *lua.LState) int {
 	})
 	err := t.templatesAPI.CopyTemplateFolder(tplFolder, tplDestination, model, exFiles)
 	if err != nil {
-		L.RaiseError("Could not copy template : '%s'", err)
-		return 0
+ 		L.Push(lua.LString(fmt.Sprintf("Could not copy template : '%s'", err)))
+		return 1
 	}
 	return 0
 }
