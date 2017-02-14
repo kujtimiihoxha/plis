@@ -1,8 +1,8 @@
 # Plis
 Plis is an application that makes it easier for programmers to create `generators` or`cli tools` for boilerplate code.
-Plis uses a very simple approach to create generators all the hard work is done behind the scene from plis you only need
+Plis uses a very simple approach to create generators, all the hard work is done behind the scene from plis you only need
 to use the API provided by plis and you are good to go.
-## Installing plis.
+## Installing Plis.
 If you have go installed you can install plis just by runing:
 ```bash
 go install github.com/kujtimiihoxha/plis
@@ -41,9 +41,9 @@ Generators are usually stored as a git repository and you can install generators
 plis get https://github.com/kujtimiihoxha/plis-generator
 ```
 
-where `https://github.com/kujtimiihoxha/plis-generator` is the repository link.
+where `https://github.com/kujtimiihoxha/plis-generator` is the repository url.
 
-*Plis uses git so git is a requirement of plis*
+**Plis uses git so git is a requirement of plis**
 
 One other way to install generators is by providing a `plis.json` file where all the generators dependencies are listed.
 ```json
@@ -76,7 +76,7 @@ A simple generator has this folder structure:
 - `.plis-generator.json` is used for debugging, if plis is run inside the `polis-hello` folder it knows that it is run
 within a generator and sets up debugging.
 
-*.plis-generator.json*
+**.plis-generator.json**
 ```json
 {
     "generator_name":"hello",
@@ -85,7 +85,7 @@ within a generator and sets up debugging.
 ```
 - `config.json` is used to keep all the generators configurations (name,flags,arguments, etc..)
 
-*config.json*
+**config.json**
 ```json
 {
     "name":"hello",
@@ -95,7 +95,7 @@ within a generator and sets up debugging.
 ```
 - `run.lua` is the script that is run when the generator is called.
 
-*run.lua*
+**run.lua**
 ```lua
 -- The main function called by plis.
 function main()

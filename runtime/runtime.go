@@ -9,7 +9,7 @@ import (
 
 type RTime interface {
 	Run() error
-	Initialize(cmd *cobra.Command, args map[string]string, c config.GeneratorConfig) RTime
+	Initialize(cmd *cobra.Command, args map[string]string, c config.GeneratorConfig)
 }
 
 func AddRuntime(cmd *cobra.Command, c config.GeneratorConfig, rt RTime) {

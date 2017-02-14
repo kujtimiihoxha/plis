@@ -6,7 +6,6 @@ import (
 	"github.com/kujtimiihoxha/plis/config"
 	"github.com/kujtimiihoxha/plis/fs"
 	"github.com/kujtimiihoxha/plis/logger"
-	"github.com/kujtimiihoxha/plis/runtime"
 	"github.com/kujtimiihoxha/plis/runtime/lua/modules"
 	"github.com/spf13/afero"
 	"github.com/spf13/cobra"
@@ -22,7 +21,7 @@ type Runtime struct {
 	cmd *cobra.Command
 }
 
-func (lr *Runtime) Initialize(cmd *cobra.Command, args map[string]string, c config.GeneratorConfig) runtime.RTime {
+func (lr *Runtime) Initialize(cmd *cobra.Command, args map[string]string, c config.GeneratorConfig){
 	lr.cmd = cmd
 	flags := glua.LTable{}
 	getFlags(&flags, lr.cmd.Flags())
@@ -38,7 +37,6 @@ func (lr *Runtime) Initialize(cmd *cobra.Command, args map[string]string, c conf
 			api.NewFsAPI(fs.GetCurrentFs()),
 		),
 	).ModuleLoader())
-	return lr
 }
 func (lr *Runtime) Run() error {
 	d, err := afero.ReadFile(lr.fs, "run.lua")
@@ -138,10 +136,10 @@ func getFlagByType(tp string, flag string, flagSet *pflag.FlagSet) glua.LValue {
 			return glua.LNumber(0)
 		}
 		return glua.LNumber(v)
-	case "float":
-		v, err := flagSet.GetInt(flag)
+	case "float64":
+		v, err := flagSet.GetFloat64(flag)
 		if err != nil {
-			return glua.LNumber(0)
+			return glua.LNumber(0.0)
 		}
 		return glua.LNumber(v)
 	case "bool":

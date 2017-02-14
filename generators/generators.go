@@ -17,6 +17,7 @@ import (
 	"github.com/spf13/viper"
 	"os"
 	"strings"
+	"github.com/kujtimiihoxha/plis/runtime/js"
 )
 
 func find() (globalGenerators []string, projectGenerators []string) {
@@ -170,6 +171,8 @@ func createCommand(c config.GeneratorConfig, gFs afero.Fs) *cobra.Command {
 	switch c.ScriptType {
 	case "lua":
 		runtime.AddRuntime(genCmd, c, lua.NewLuaRuntime(gFs))
+	case "js":
+		runtime.AddRuntime(genCmd, c, js.NewJsRuntime(gFs))
 	default:
 		runtime.AddRuntime(genCmd, c, lua.NewLuaRuntime(gFs))
 	}

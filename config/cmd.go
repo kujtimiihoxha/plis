@@ -7,7 +7,7 @@ import (
 
 var (
 	InputTypes  = []string{"string", "int", "float", "bool"}
-	ScriptTypes = []string{"lua"}
+	ScriptTypes = []string{"lua","js"}
 )
 
 type GeneratorConfig struct {
