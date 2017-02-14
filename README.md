@@ -22,10 +22,12 @@ Generators are stored in 2 locations:
  - Project generators:
  Project generators are stored in `plis/generators` folder in the current directory.
  
- Every generator is located in a folder named `plis-{generator-name}` in one of the locations mentioned above.
+Every generator is located in a folder named `plis-{generator-name}` in one of the locations mentioned above.
  
- Generators are usually stored as a git repository and you can install generators by running:
- 
+## How do I install a generator ?
+
+Generators are usually stored as a git repository and you can install generators by running:
+
  ```bash
 plis get https://github.com/kujtimiihoxha/plis-generator
 ```
@@ -52,3 +54,56 @@ the `--branch` flag e.x:
 ```bash
 plis get https://github.com/kujtimiihoxha/plis-generator --branch v1
 ```
+## Give me the "Hello world" plis generator!
+A simple generator has this folder structure:
+```bash
+├── plis-hello/
+│   ├── .gitignore
+│   ├── .plis-generator.json
+│   ├── config.json
+│   ├── run.lua
+│   └── test-project/
+```
+- `.plis-generator.json` is used for debugging, if plis is run inside the `polis-hello` folder it knows that it is run
+within a generator and sets up debugging.
+
+*.plis-generator.json*
+```json
+{
+    "generator_name":"hello",
+    "test_dir":"test-project"
+}
+```
+- `config.json` is used to keep all the generators configurations (name,flags,arguments, etc..)
+
+*config.json*
+```json
+{
+    "name":"hello",
+    "description":"This is the 'hello' plis generator ",
+    "script_type":"lua"
+}
+```
+- `run.lua` is the script that is run when the generator is called.
+
+*run.lua*
+```lua
+-- The main function called by plis.
+function main()
+    print("Hello World!")
+end
+```
+
+Now the only thing you have to do is run:
+```bash
+plis hello
+```
+
+and the generator prints out :
+```bash
+Hello World!
+```
+
+- `test-project/` this folder is used when you are testing your generator, every time you run plis inside a generator
+the generator that is run thinks that `test-project/` is the folder you are running plis from (the base folder),
+this allows you to test your generators when you have to deal with files read,write and templates.
