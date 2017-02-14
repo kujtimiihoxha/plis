@@ -2,6 +2,15 @@
 Plis is an application that makes it easier for programmers to create `generators` or`cli tools` for boilerplate code.
 Plis uses a very simple approach to create generators all the hard work is done behind the scene from plis you only need
 to use the API provided by plis and you are good to go.
+## Installing plis.
+If you have go installed you can install plis just by runing:
+```bash
+go install github.com/kujtimiihoxha/plis
+```
+If not you can download a build of plis. (TODO.)
+## Docs.
+In depth documentation and instructions on plis API and how to create your own generators are in the
+ [Wiki](https://github.com/kujtimiihoxha/plis/wiki) (TODO.)
 ## Hows does plis work ?
 Plis is kind of like "npm", it has defined directories where packages (generators) are stored, generators can be 
 global or local depending on how you install them. Plis reads these generators and makes it possible for you to run them.
