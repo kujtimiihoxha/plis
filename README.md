@@ -18,7 +18,7 @@ A plis generator is a folder with at least 2 files:
 Generators are stored in 2 locations:
 
  - Global generators :
- Global generators are stored in   `$USERHOME/.plis/generators`
+ Global generators are stored in   `$HOME/.plis/generators`
  - Project generators:
  Project generators are stored in `plis/generators` folder in the current directory.
  
