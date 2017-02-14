@@ -56,7 +56,7 @@ func (fsm *FileSystemModule) exists(L *lua.LState) int {
 	return 1
 }
 func (fsm *FileSystemModule) fileSeparator(L *lua.LState) int {
-	v := fsm.fsAPI.FileSeparator()
+	v := fsm.fsAPI.FilePathSeparator()
 	L.Push(lua.LString(v))
 	return 1
 }

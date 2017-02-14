@@ -17,7 +17,6 @@ package cmd
 import (
 	"encoding/json"
 	"fmt"
-	"github.com/kujtimiihoxha/plis/api"
 	"github.com/kujtimiihoxha/plis/config"
 	"github.com/kujtimiihoxha/plis/fs"
 	"github.com/kujtimiihoxha/plis/logger"
@@ -66,8 +65,9 @@ func getGenerator(rep string, branch string) {
 		logger.GetLogger().Error(err)
 	}
 	if !viper.GetBool("plis.get.global") {
-		fsAPI := api.NewFsAPI(fs.GetCurrentFs())
-		b, err := fsAPI.Exists("plis.json")
+		//fsAPI := api.NewFsAPI(fs.GetCurrentFs())
+		_fs := fs.GetCurrentFs()
+		b, err := afero.Exists(_fs,"plis.json")
 		if err != nil {
 			logger.GetLogger().Fatal(err)
 		}
@@ -85,9 +85,9 @@ func getGenerator(rep string, branch string) {
 				},
 			}
 			data, _ := json.MarshalIndent(pc, "", "    ")
-			fsAPI.WriteFile("plis.json", string(data))
+			afero.WriteFile(_fs,"plis.json", data,os.ModePerm)
 		} else {
-			data, _ := fsAPI.ReadFile("plis.json")
+			data, _ := afero.ReadFile(_fs,"plis.json")
 			pc := config.PlisConfig{}
 			json.Unmarshal([]byte(data), &pc)
 			exists := false
@@ -99,7 +99,7 @@ func getGenerator(rep string, branch string) {
 			if !exists {
 				pc.Dependencies = append(pc.Dependencies, pd)
 				d, _ := json.MarshalIndent(pc, "", "    ")
-				fsAPI.WriteFile("plis.json", string(d))
+				afero.WriteFile(_fs,"plis.json", d,os.ModePerm)
 			}
 		}
 	}
@@ -113,13 +113,14 @@ func getGenerator(rep string, branch string) {
 }
 func checkIfGeneratorFolderExists() string {
 	if viper.GetBool("plis.get.global") {
-		fsAPI := api.NewFsAPI(fs.GetPlisRootFs())
-		b, err := fsAPI.Exists("generators")
+		//fsAPI := api.NewFsAPI(fs.GetPlisRootFs())
+		_fs := fs.GetPlisRootFs()
+		b, err := afero.Exists(_fs,"generators")
 		if err != nil {
 			logger.GetLogger().Fatal(err)
 		}
 		if !b {
-			err = fsAPI.Mkdir("generators")
+			err = _fs.Mkdir("generators", os.ModePerm)
 			if err != nil {
 				logger.GetLogger().Fatal(err)
 			}
@@ -127,18 +128,19 @@ func checkIfGeneratorFolderExists() string {
 
 		return viper.GetString("plis.dir.generators")
 	}
-	fsAPI := api.NewFsAPI(fs.GetCurrentFs())
-	b, err := fsAPI.Exists(fmt.Sprintf("plis%sgenerators", fsAPI.FileSeparator()))
+	//fsAPI := api.NewFsAPI(fs.GetCurrentFs())
+	_fs := fs.GetCurrentFs()
+	b, err := afero.Exists(_fs,fmt.Sprintf("plis%sgenerators", afero.FilePathSeparator))
 	if err != nil {
 		logger.GetLogger().Fatal(err)
 	}
 	if !b {
-		err = fsAPI.MkdirAll(fmt.Sprintf("plis%sgenerators", fsAPI.FileSeparator()))
+		err = _fs.MkdirAll(fmt.Sprintf("plis%sgenerators", afero.FilePathSeparator),os.ModePerm)
 		if err != nil {
 			logger.GetLogger().Fatal(err)
 		}
 	}
-	return "plis" + fsAPI.FileSeparator() + "generators"
+	return "plis" + afero.FilePathSeparator + "generators"
 }
 func init() {
 	getCmd.Flags().BoolP("global", "g", false, "Use if the generator should be installed globally")

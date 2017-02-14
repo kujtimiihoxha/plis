@@ -17,7 +17,6 @@ package cmd
 import (
 	"encoding/json"
 	"fmt"
-	"github.com/kujtimiihoxha/plis/api"
 	"github.com/kujtimiihoxha/plis/config"
 	"github.com/kujtimiihoxha/plis/fs"
 	"github.com/kujtimiihoxha/plis/logger"
@@ -37,15 +36,16 @@ var installCmd = &cobra.Command{
 
 func installDependencies(global bool, path string) {
 	fmt.Println(path)
-	fsApi := api.NewFsAPI(fs.GetCurrentFs())
+	//fsApi := api.NewFsAPI(fs.GetCurrentFs())
+	_fs := fs.GetCurrentFs()
 	if path != "" {
 		if !global {
-			fsApi = api.NewFsAPI(afero.NewBasePathFs(fs.GetCurrentFs(), path))
+			_fs = afero.NewBasePathFs(fs.GetCurrentFs(), path)
 		}
-		fsApi = api.NewFsAPI(afero.NewBasePathFs(afero.NewOsFs(), path))
+		_fs = afero.NewBasePathFs(afero.NewOsFs(), path)
 
 	}
-	data, err := fsApi.ReadFile("plis.json")
+	data, err := afero.ReadFile(_fs,"plis.json")
 	if err != nil {
 		logger.GetLogger().Error("Could not read plis configuration file : ", err)
 		return
