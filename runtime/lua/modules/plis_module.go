@@ -3,7 +3,6 @@ package modules
 import (
 	"fmt"
 	"github.com/kujtimiihoxha/plis/api"
-	"github.com/kujtimiihoxha/plis/cmd"
 	"github.com/kujtimiihoxha/plis/helpers"
 	"github.com/yuin/gopher-lua"
 )
@@ -34,22 +33,20 @@ func (p *PlisModule) help(L *lua.LState) int {
 	return 0
 }
 func (p *PlisModule) runPlisCmd(L *lua.LState) int {
-	c := L.CheckString(1)
+	pCmd := L.CheckString(1)
 	args := L.CheckAny(2)
 	v, ok := helpers.ToGoValue(args).([]interface{})
 	if !ok {
-		L.RaiseError("The arguments must be an array")
-		return 0
+		L.Push(lua.LString("The arguments must be an array"))
+		return 1
 	}
-	s := []string{
-		c,
-	}
+	s := []string{}
 	for _, a := range v {
 		s = append(s, fmt.Sprint(a))
 	}
-	cmd.RootCmd.SetArgs(s)
-	if err := cmd.RootCmd.Execute(); err != nil {
-		L.RaiseError(err.Error())
+	if err := p.plisAPI.RunPlisCmd(pCmd, s); err != nil {
+		L.Push(lua.LString(err.Error()))
+		return 1
 	}
 	return 0
 }

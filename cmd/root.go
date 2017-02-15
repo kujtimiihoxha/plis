@@ -23,8 +23,8 @@ import (
 var RootCmd = &cobra.Command{
 	Use:   "plis",
 	Short: "Automate tasks / code generation with plis",
-	Long: `Plis is a generator/command framework that makes it easier
-to create and distribute generators.
+	Long: `Plis is a framework that makes it easier
+to create and distribute cli tools.
 
 Plis is created by @kujtimiihoxha and is written with GO.`,
 	// Uncomment the following line if your bare application

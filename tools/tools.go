@@ -1,4 +1,4 @@
-package generators
+package tools
 
 import (
 	"encoding/json"
@@ -11,6 +11,7 @@ import (
 	"github.com/kujtimiihoxha/plis/helpers"
 	"github.com/kujtimiihoxha/plis/logger"
 	"github.com/kujtimiihoxha/plis/runtime"
+	"github.com/kujtimiihoxha/plis/runtime/js"
 	"github.com/kujtimiihoxha/plis/runtime/lua"
 	"github.com/spf13/afero"
 	"github.com/spf13/cobra"
@@ -19,51 +20,51 @@ import (
 	"strings"
 )
 
-func find() (globalGenerators []string, projectGenerators []string) {
-	dirs, err := afero.ReadDir(fs.GetPlisRootFs(), "generators")
+func find() (globalTools []string, projectTools []string) {
+	dirs, err := afero.ReadDir(fs.GetPlisRootFs(), "tools")
 	if err != nil {
 		logger.GetLogger().Fatal(err)
 	}
 	for _, f := range dirs {
 		if !strings.HasPrefix(f.Name(), ".") && strings.HasPrefix(f.Name(), "plis-") {
-			globalGenerators = append(globalGenerators, strings.TrimPrefix(f.Name(), "plis-"))
+			globalTools = append(globalTools, strings.TrimPrefix(f.Name(), "plis-"))
 		}
 	}
-	dirs, err = afero.ReadDir(fs.GetCurrentFs(), "plis"+afero.FilePathSeparator+"generators")
+	dirs, err = afero.ReadDir(fs.GetCurrentFs(), "plis"+afero.FilePathSeparator+"tools")
 	if err != nil {
 		if os.IsNotExist(err) {
-			logger.GetLogger().Info("No project generators.")
+			logger.GetLogger().Info("No project tools.")
 		} else {
 			logger.GetLogger().Fatal(err)
 		}
 	}
 	for _, f := range dirs {
 		if !strings.HasPrefix(f.Name(), ".") && strings.HasPrefix(f.Name(), "plis-") {
-			projectGenerators = append(projectGenerators, strings.TrimPrefix(f.Name(), "plis-"))
+			projectTools = append(projectTools, strings.TrimPrefix(f.Name(), "plis-"))
 		}
 	}
 	return
 }
 func Initialize() {
-	globalGenerators, projectGenerators := find()
-	for _, v := range globalGenerators {
+	globalTools, projectTools := find()
+	for _, v := range globalTools {
 		gFs := afero.NewBasePathFs(
 			fs.GetPlisRootFs(),
-			fmt.Sprintf("generators%splis-%s", afero.FilePathSeparator, v),
+			fmt.Sprintf("tools%splis-%s", afero.FilePathSeparator, v),
 		)
 		viper.Set(
-			fmt.Sprintf("plis.generators.%s.root", v),
+			fmt.Sprintf("plis.tools.%s.root", v),
 			fmt.Sprintf(
-				"%s%sgenerators%splis-%s",
+				"%s%stools%splis-%s",
 				viper.GetString("plis.dir.root"),
 				afero.FilePathSeparator,
 				afero.FilePathSeparator,
 				v,
 			),
 		)
-		createGeneratorCmd(gFs, cmd.RootCmd, v)
+		createToolCmd(gFs, cmd.RootCmd, v)
 	}
-	for _, v := range projectGenerators {
+	for _, v := range projectTools {
 		if v == "get" || v == "install" {
 			logger.GetLogger().Warnf("The commandd '%s' is a build in command so it can not be used", v)
 			continue
@@ -79,12 +80,12 @@ func Initialize() {
 			}
 		}
 		cmd.RootCmd.RemoveCommand(toRemove...)
-		gFs := afero.NewBasePathFs(fs.GetCurrentFs(), fmt.Sprintf("plis%sgenerators%splis-%s", afero.FilePathSeparator, afero.FilePathSeparator, v))
+		gFs := afero.NewBasePathFs(fs.GetCurrentFs(), fmt.Sprintf("plis%stools%splis-%s", afero.FilePathSeparator, afero.FilePathSeparator, v))
 		dr, _ := os.Getwd()
 		viper.Set(
-			fmt.Sprintf("plis.generators.%s.root", v),
+			fmt.Sprintf("plis.tools.%s.root", v),
 			fmt.Sprintf(
-				"%s%splis%sgenerators%splis-%s",
+				"%s%splis%stools%splis-%s",
 				dr,
 				afero.FilePathSeparator,
 				afero.FilePathSeparator,
@@ -92,39 +93,39 @@ func Initialize() {
 				v,
 			),
 		)
-		createGeneratorCmd(gFs, cmd.RootCmd, v)
+		createToolCmd(gFs, cmd.RootCmd, v)
 	}
-	checkIfGeneratorProject()
+	checkIfToolProject()
 }
-func createGeneratorCmd(fs afero.Fs, cmd *cobra.Command, generator string) {
+func createToolCmd(fs afero.Fs, cmd *cobra.Command, tool string) {
 	d, err := afero.ReadFile(fs, "config.json")
 	if err != nil {
 		logger.GetLogger().Errorf(
-			"Generator `%s` has no config file and it will be ignored",
-			generator,
+			"Tool `%s` has no config file and it will be ignored",
+			tool,
 		)
 		return
 	}
-	c := config.GeneratorConfig{}
+	c := config.ToolConfig{}
 	err = json.Unmarshal(d, &c)
 	if err != nil {
 		logger.GetLogger().Errorf(
-			"Could not read the config file of `%s` generator, this generator will be ignored",
-			generator,
+			"Could not read the config file of `%s` tool, this tool will be ignored",
+			tool,
 		)
 		return
 	}
 	if c.Name == "" {
-		c.Name = generator
+		c.Name = tool
 	}
 	addCmd(cmd, c, fs)
 }
-func addCmd(cmd *cobra.Command, c config.GeneratorConfig, gFs afero.Fs) {
-	logger.GetLogger().Infof("Validating generator `%s`...", c.Name)
+func addCmd(cmd *cobra.Command, c config.ToolConfig, gFs afero.Fs) {
+	logger.GetLogger().Infof("Validating tool `%s`...", c.Name)
 	if c.Validate() {
 		logger.GetLogger().Info("Validation Ok")
 		logger.GetLogger().Info("Validating flags...")
-		flagsToKeep := []config.GeneratorFlag{}
+		flagsToKeep := []config.ToolFlag{}
 		for _, v := range c.Flags {
 			if v.Validate() {
 				logger.GetLogger().Infof("Flag `%s` OK", v.Name)
@@ -135,7 +136,7 @@ func addCmd(cmd *cobra.Command, c config.GeneratorConfig, gFs afero.Fs) {
 		}
 		c.Flags = flagsToKeep
 		logger.GetLogger().Info("Validating args...")
-		argsToKeep := []config.GeneratorArgs{}
+		argsToKeep := []config.ToolArgs{}
 		for _, v := range c.Args {
 			if v.Validate() {
 				logger.GetLogger().Infof("Argument `%s` OK", v.Name)
@@ -154,11 +155,11 @@ func addCmd(cmd *cobra.Command, c config.GeneratorConfig, gFs afero.Fs) {
 	cmd.AddCommand(newC)
 	for _, v := range c.SubCommands {
 		_gFs := afero.NewBasePathFs(gFs, v)
-		createGeneratorCmd(_gFs, newC, v)
+		createToolCmd(_gFs, newC, v)
 	}
 	// update viper base.
 }
-func createCommand(c config.GeneratorConfig, gFs afero.Fs) *cobra.Command {
+func createCommand(c config.ToolConfig, gFs afero.Fs) *cobra.Command {
 	genCmd := &cobra.Command{
 		Use:     c.Name,
 		Short:   c.Description,
@@ -170,12 +171,14 @@ func createCommand(c config.GeneratorConfig, gFs afero.Fs) *cobra.Command {
 	switch c.ScriptType {
 	case "lua":
 		runtime.AddRuntime(genCmd, c, lua.NewLuaRuntime(gFs))
+	case "js":
+		runtime.AddRuntime(genCmd, c, js.NewJsRuntime(gFs))
 	default:
 		runtime.AddRuntime(genCmd, c, lua.NewLuaRuntime(gFs))
 	}
 	return genCmd
 }
-func addFlags(command *cobra.Command, c config.GeneratorConfig) {
+func addFlags(command *cobra.Command, c config.ToolConfig) {
 	for _, v := range c.Flags {
 		if v.Persistent {
 			switch v.Type {
@@ -230,17 +233,17 @@ Additional help topics:{{range .Commands}}{{if .IsHelpCommand}}
 Use "{{.CommandPath}} [command] --help" for more information about a command.{{end}}
 `
 }
-func checkIfGeneratorProject() {
+func checkIfToolProject() {
 	logger.SetLevel(logrus.InfoLevel)
-	d, err := afero.ReadFile(fs.GetCurrentFs(), ".plis-generator.json")
+	d, err := afero.ReadFile(fs.GetCurrentFs(), ".plis-tool.json")
 	if err != nil {
 		return
 	}
-	c := config.GeneratorProjectConfig{}
+	c := config.ToolProjectConfig{}
 	err = json.Unmarshal(d, &c)
 	if err != nil {
 		logger.GetLogger().Error(
-			"Could not read the generator project config file",
+			"Could not read the tool project config file",
 			err,
 		)
 		return
@@ -248,20 +251,20 @@ func checkIfGeneratorProject() {
 	v, _ := govalidator.ValidateStruct(c)
 	if !v {
 		logger.GetLogger().Error(
-			"Could not calidate the generator project config file, make sure you specified all the required fields",
+			"Could not calidate the tool project config file, make sure you specified all the required fields",
 		)
 		return
 	}
 	currentFs := fs.GetCurrentFs()
-	fs.SetGeneratorTestFs(afero.NewBasePathFs(currentFs, c.TestDir))
-	viper.Set("plis.generator_project_name", c.GeneratorName)
+	fs.SetToolTestFs(afero.NewBasePathFs(currentFs, c.TestDir))
+	viper.Set("plis.tool_project_name", c.ToolName)
 	dr, _ := os.Getwd()
 	viper.Set(
-		fmt.Sprintf("plis.generators.%s.root", c.GeneratorName),
+		fmt.Sprintf("plis.tools.%s.root", c.ToolName),
 		fmt.Sprintf(
 			dr,
 		),
 	)
-	createGeneratorCmd(currentFs, cmd.RootCmd, c.GeneratorName)
+	createToolCmd(currentFs, cmd.RootCmd, c.ToolName)
 
 }

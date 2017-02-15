@@ -7,25 +7,25 @@ import (
 
 var (
 	InputTypes  = []string{"string", "int", "float", "bool"}
-	ScriptTypes = []string{"lua"}
+	ScriptTypes = []string{"lua", "js"}
 )
 
-type GeneratorConfig struct {
+type ToolConfig struct {
 	Name            string          `json:"name" valid:"required"`
 	Description     string          `json:"description" valid:"required"`
 	LongDescription []string        `json:"long_description"`
 	Aliases         []string        `json:"aliases"`
-	Args            []GeneratorArgs `json:"args"`
-	Flags           []GeneratorFlag `json:"flags"`
+	Args            []ToolArgs `json:"args"`
+	Flags           []ToolFlag `json:"flags"`
 	SubCommands     []string        `json:"sub_commands"`
 	ScriptType      string          `json:"script_type" valid:"scriptType,required"`
 }
-type GeneratorProjectConfig struct {
-	GeneratorName string           `json:"generator_name" valid:"required"`
-	TestDir       string           `json:"test_dir" valid:"required"`
-	Dependencies  []PlisDependency `json:"dependencies"`
+type ToolProjectConfig struct {
+	ToolName     string           `json:"tool_name" valid:"required"`
+	TestDir      string           `json:"test_dir" valid:"required"`
+	Dependencies []PlisDependency `json:"dependencies"`
 }
-type GeneratorFlag struct {
+type ToolFlag struct {
 	Name        string      `json:"name" valid:"required"`
 	Description string      `json:"description" valid:"required"`
 	Type        string      `json:"type" valid:"inputType"`
@@ -33,26 +33,26 @@ type GeneratorFlag struct {
 	Persistent  bool        `json:"persistent"`
 	Short       string      `json:"short" valid:"lenOne"`
 }
-type GeneratorArgs struct {
+type ToolArgs struct {
 	Name        string `json:"name" valid:"required"`
 	Description string `json:"description" valid:"required"`
 	Type        string `json:"type" valid:"inputType"`
 	Required    bool   `json:"required"`
 }
 
-func (c *GeneratorConfig) Validate() bool {
+func (c *ToolConfig) Validate() bool {
 	result, err := govalidator.ValidateStruct(c)
 	if govalidator.ErrorsByField(err)["Name"] != "" {
-		logger.GetLogger().Warn("The name of the generator is required")
+		logger.GetLogger().Warn("The name of the tool is required")
 		return false
 	}
 	if govalidator.ErrorsByField(err)["Description"] != "" {
-		logger.GetLogger().Warn("The description of the generator is required")
+		logger.GetLogger().Warn("The description of the tool is required")
 		return false
 	}
 	if govalidator.ErrorsByField(err)["ScriptType"] != "" {
 		if c.ScriptType == "" {
-			logger.GetLogger().Warn("The generator needs to specify the script type")
+			logger.GetLogger().Warn("The tool needs to specify the script type")
 			return false
 		}
 		logger.GetLogger().Warnf("The script type `%s` is not suported , the suported types are `%s`", c.ScriptType, ScriptTypes)
@@ -60,7 +60,7 @@ func (c *GeneratorConfig) Validate() bool {
 	}
 	return result
 }
-func (cf *GeneratorFlag) Validate() bool {
+func (cf *ToolFlag) Validate() bool {
 	result, err := govalidator.ValidateStruct(cf)
 	if govalidator.ErrorsByField(err)["Name"] != "" {
 		logger.GetLogger().Warn("The name of the flag is required")
@@ -88,7 +88,7 @@ func (cf *GeneratorFlag) Validate() bool {
 	}
 	return result
 }
-func checkDefault(flag *GeneratorFlag) bool {
+func checkDefault(flag *ToolFlag) bool {
 	switch flag.Type {
 	case "string":
 		if flag.Default == nil {
@@ -117,7 +117,7 @@ func checkDefault(flag *GeneratorFlag) bool {
 	}
 	return false
 }
-func (ca *GeneratorArgs) Validate() bool {
+func (ca *ToolArgs) Validate() bool {
 	result, err := govalidator.ValidateStruct(ca)
 	if govalidator.ErrorsByField(err)["Name"] != "" {
 		logger.GetLogger().Warn("The name of the argument is required")

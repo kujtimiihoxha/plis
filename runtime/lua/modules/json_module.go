@@ -2,6 +2,7 @@ package modules
 
 import (
 	"encoding/json"
+	"fmt"
 	"github.com/kujtimiihoxha/plis/helpers"
 	"github.com/yuin/gopher-lua"
 )
@@ -33,8 +34,8 @@ func (j *JSONModule) decode(L *lua.LState) int {
 	err := json.Unmarshal([]byte(str), &value)
 	if err != nil {
 		L.Push(lua.LNil)
-		L.RaiseError("Could not decode json : '%s'", err)
-		return 1
+		L.Push(lua.LString(fmt.Sprintf("Could not decode json : '%s'", err)))
+		return 2
 	}
 	L.Push(helpers.FromJSON(L, value))
 	return 1
@@ -45,8 +46,8 @@ func (j *JSONModule) encode(L *lua.LState) int {
 	data, err := helpers.ToJSON(value, visited, json.Marshal)
 	if err != nil {
 		L.Push(lua.LNil)
-		L.RaiseError("Could not encode json : '%s'", err)
-		return 1
+		L.Push(lua.LString(fmt.Sprintf("Could not encode json : '%s'", err)))
+		return 2
 	}
 	L.Push(lua.LString(string(data)))
 	return 1
@@ -57,8 +58,8 @@ func (j *JSONModule) encodeF(L *lua.LState) int {
 	data, err := helpers.ToJSON(value, visited, marshalFormat)
 	if err != nil {
 		L.Push(lua.LNil)
-		L.RaiseError("Could not encode json : '%s'", err)
-		return 1
+		L.Push(lua.LString(fmt.Sprintf("Could not encode json : '%s'", err)))
+		return 2
 	}
 	L.Push(lua.LString(string(data)))
 	return 1

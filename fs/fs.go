@@ -8,7 +8,7 @@ import (
 
 var plisRootFs afero.Fs
 var currentFs afero.Fs
-var generatorTestDir afero.Fs
+var toolTestDir afero.Fs
 
 func initialize() {
 	if viper.GetString("plis.dir.root") == "" {
@@ -34,15 +34,15 @@ func GetCurrentFs() afero.Fs {
 	if currentFs == nil {
 		initialize()
 	}
-	if viper.GetBool("plis.is_generator_project") {
+	if viper.GetBool("plis.is_tool_project") {
 		if viper.GetString("plis.debug_folder") != "" {
-			return afero.NewBasePathFs(generatorTestDir, viper.GetString("plis.debug_folder"))
+			return afero.NewBasePathFs(toolTestDir, viper.GetString("plis.debug_folder"))
 		}
-		return generatorTestDir
+		return toolTestDir
 	}
 	return currentFs
 }
 
-func SetGeneratorTestFs(fs afero.Fs) {
-	generatorTestDir = fs
+func SetToolTestFs(fs afero.Fs) {
+	toolTestDir = fs
 }
