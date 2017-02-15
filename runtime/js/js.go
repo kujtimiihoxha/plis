@@ -1,7 +1,6 @@
 package js
 
 import (
-	"fmt"
 	"github.com/kujtimiihoxha/plis/api"
 	"github.com/kujtimiihoxha/plis/config"
 	"github.com/kujtimiihoxha/plis/fs"
@@ -105,7 +104,6 @@ func getArgumentByType(tp string, arg string, name string) interface{} {
 
 func getFlags(tb *otto.Object, flags *pflag.FlagSet) {
 	flags.VisitAll(func(f *pflag.Flag) {
-		fmt.Println(f.Value.Type())
 		tb.Set(f.Name, getFlagByType(f.Value.Type(), f.Name, flags))
 	})
 }
