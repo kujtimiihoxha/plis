@@ -1,10 +1,10 @@
 package modules
 
 import (
+	"fmt"
 	"github.com/kujtimiihoxha/plis/api"
 	"github.com/kujtimiihoxha/plis/helpers"
 	"github.com/yuin/gopher-lua"
-	"fmt"
 )
 
 type TemplatesModule struct {
@@ -19,7 +19,7 @@ func (t *TemplatesModule) copyTemplate(L *lua.LState) int {
 	tplModel.ForEach(func(key lua.LValue, value lua.LValue) {
 		model[helpers.ToCamelCaseOrUnderscore(helpers.ToGoValue(key).(string))] = helpers.ToGoValue(value)
 	})
-	if tplDestination == ""{
+	if tplDestination == "" {
 		tplDestination = tplName
 	}
 	err := t.templatesAPI.CopyTemplate(tplName, tplDestination, model)
@@ -46,7 +46,7 @@ func (t *TemplatesModule) copyTemplateFolder(L *lua.LState) int {
 	})
 	err := t.templatesAPI.CopyTemplateFolder(tplFolder, tplDestination, model, exFiles)
 	if err != nil {
- 		L.Push(lua.LString(fmt.Sprintf("Could not copy template : '%s'", err)))
+		L.Push(lua.LString(fmt.Sprintf("Could not copy template : '%s'", err)))
 		return 1
 	}
 	return 0

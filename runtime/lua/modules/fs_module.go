@@ -1,9 +1,9 @@
 package modules
 
 import (
+	"fmt"
 	"github.com/kujtimiihoxha/plis/api"
 	"github.com/yuin/gopher-lua"
-	"fmt"
 )
 
 type FileSystemModule struct {

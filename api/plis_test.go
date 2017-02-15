@@ -1,16 +1,18 @@
 package api
 
 import (
-	"testing"
-	"github.com/spf13/cobra"
 	. "github.com/smartystreets/goconvey/convey"
+	"github.com/spf13/cobra"
+	"testing"
 
-	"strings"
 	"github.com/kujtimiihoxha/plis/cmd"
+	"strings"
 )
-type testWriter struct{
+
+type testWriter struct {
 	test string
 }
+
 func TestPlisAPI_Help(t *testing.T) {
 	c := &cobra.Command{
 		Use:   "plis",
@@ -21,7 +23,7 @@ func TestPlisAPI_Help(t *testing.T) {
 	plisAPI := NewPlisAPI(c)
 	plisAPI.Help()
 	Convey("Check if help command is executed", t, func() {
-		So(strings.Contains(tW.test,c.Short),ShouldBeTrue)
+		So(strings.Contains(tW.test, c.Short), ShouldBeTrue)
 	})
 
 }
@@ -30,7 +32,7 @@ func TestPlisAPI_RunPlisCmd(t *testing.T) {
 		Use:   "test",
 		Short: "Test description",
 	}
-	c.Flags().String("tst","","Test Fla")
+	c.Flags().String("tst", "", "Test Fla")
 	tW := NewTestWritter()
 	c.SetOutput(tW)
 	cmd.RootCmd.SetOutput(tW)
@@ -41,22 +43,22 @@ func TestPlisAPI_RunPlisCmd(t *testing.T) {
 		"hello",
 	}
 	Convey("Check if command is called", t, func() {
-		err := plisAPI.RunPlisCmd("test",args)
+		err := plisAPI.RunPlisCmd("test", args)
 		Convey("Check if command executes without errors", func() {
-			So(err,ShouldBeNil)
+			So(err, ShouldBeNil)
 		})
 		Convey("Check if command executes and flags are set", func() {
-			So(c.Flags().Lookup("tst").Value.String(),ShouldEqual,"hello")
+			So(c.Flags().Lookup("tst").Value.String(), ShouldEqual, "hello")
 		})
 	})
 
 }
 func NewTestWritter() *testWriter {
 	return &testWriter{
-		test:"",
+		test: "",
 	}
 }
-func (w *testWriter) Write(data []byte) (n int, err error){
+func (w *testWriter) Write(data []byte) (n int, err error) {
 	w.test += string(data)
-	return len(data),nil
+	return len(data), nil
 }

@@ -44,7 +44,7 @@ func (p *PlisModule) runPlisCmd(L *lua.LState) int {
 	for _, a := range v {
 		s = append(s, fmt.Sprint(a))
 	}
-	if err := p.plisAPI.RunPlisCmd(pCmd,s); err != nil {
+	if err := p.plisAPI.RunPlisCmd(pCmd, s); err != nil {
 		L.Push(lua.LString(err.Error()))
 		return 1
 	}

@@ -2,9 +2,9 @@ package modules
 
 import (
 	"encoding/json"
+	"fmt"
 	"github.com/kujtimiihoxha/plis/helpers"
 	"github.com/yuin/gopher-lua"
-	"fmt"
 )
 
 type JSONModule struct{}

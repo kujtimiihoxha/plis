@@ -45,7 +45,7 @@ func installDependencies(global bool, path string) {
 		_fs = afero.NewBasePathFs(afero.NewOsFs(), path)
 
 	}
-	data, err := afero.ReadFile(_fs,"plis.json")
+	data, err := afero.ReadFile(_fs, "plis.json")
 	if err != nil {
 		logger.GetLogger().Error("Could not read plis configuration file : ", err)
 		return

@@ -11,13 +11,13 @@ import (
 	"github.com/kujtimiihoxha/plis/helpers"
 	"github.com/kujtimiihoxha/plis/logger"
 	"github.com/kujtimiihoxha/plis/runtime"
+	"github.com/kujtimiihoxha/plis/runtime/js"
 	"github.com/kujtimiihoxha/plis/runtime/lua"
 	"github.com/spf13/afero"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
 	"os"
 	"strings"
-	"github.com/kujtimiihoxha/plis/runtime/js"
 )
 
 func find() (globalGenerators []string, projectGenerators []string) {

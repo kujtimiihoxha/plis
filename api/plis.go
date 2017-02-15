@@ -1,8 +1,8 @@
 package api
 
 import (
-	"github.com/spf13/cobra"
 	"github.com/kujtimiihoxha/plis/cmd"
+	"github.com/spf13/cobra"
 )
 
 type PlisAPI struct {
@@ -18,11 +18,11 @@ func NewPlisAPI(cmd *cobra.Command) *PlisAPI {
 	}
 }
 
-func (p *PlisAPI) RunPlisCmd(pCmd string, s []string) error{
+func (p *PlisAPI) RunPlisCmd(pCmd string, s []string) error {
 	c := []string{
 		pCmd,
 	}
-	c = append(c,s...)
+	c = append(c, s...)
 	cmd.RootCmd.SetArgs(c)
 	return cmd.RootCmd.Execute()
 }

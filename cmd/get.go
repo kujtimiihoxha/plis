@@ -67,7 +67,7 @@ func getGenerator(rep string, branch string) {
 	if !viper.GetBool("plis.get.global") {
 		//fsAPI := api.NewFsAPI(fs.GetCurrentFs())
 		_fs := fs.GetCurrentFs()
-		b, err := afero.Exists(_fs,"plis.json")
+		b, err := afero.Exists(_fs, "plis.json")
 		if err != nil {
 			logger.GetLogger().Fatal(err)
 		}
@@ -85,9 +85,9 @@ func getGenerator(rep string, branch string) {
 				},
 			}
 			data, _ := json.MarshalIndent(pc, "", "    ")
-			afero.WriteFile(_fs,"plis.json", data,os.ModePerm)
+			afero.WriteFile(_fs, "plis.json", data, os.ModePerm)
 		} else {
-			data, _ := afero.ReadFile(_fs,"plis.json")
+			data, _ := afero.ReadFile(_fs, "plis.json")
 			pc := config.PlisConfig{}
 			json.Unmarshal([]byte(data), &pc)
 			exists := false
@@ -99,7 +99,7 @@ func getGenerator(rep string, branch string) {
 			if !exists {
 				pc.Dependencies = append(pc.Dependencies, pd)
 				d, _ := json.MarshalIndent(pc, "", "    ")
-				afero.WriteFile(_fs,"plis.json", d,os.ModePerm)
+				afero.WriteFile(_fs, "plis.json", d, os.ModePerm)
 			}
 		}
 	}
@@ -115,7 +115,7 @@ func checkIfGeneratorFolderExists() string {
 	if viper.GetBool("plis.get.global") {
 		//fsAPI := api.NewFsAPI(fs.GetPlisRootFs())
 		_fs := fs.GetPlisRootFs()
-		b, err := afero.Exists(_fs,"generators")
+		b, err := afero.Exists(_fs, "generators")
 		if err != nil {
 			logger.GetLogger().Fatal(err)
 		}
@@ -130,12 +130,12 @@ func checkIfGeneratorFolderExists() string {
 	}
 	//fsAPI := api.NewFsAPI(fs.GetCurrentFs())
 	_fs := fs.GetCurrentFs()
-	b, err := afero.Exists(_fs,fmt.Sprintf("plis%sgenerators", afero.FilePathSeparator))
+	b, err := afero.Exists(_fs, fmt.Sprintf("plis%sgenerators", afero.FilePathSeparator))
 	if err != nil {
 		logger.GetLogger().Fatal(err)
 	}
 	if !b {
-		err = _fs.MkdirAll(fmt.Sprintf("plis%sgenerators", afero.FilePathSeparator),os.ModePerm)
+		err = _fs.MkdirAll(fmt.Sprintf("plis%sgenerators", afero.FilePathSeparator), os.ModePerm)
 		if err != nil {
 			logger.GetLogger().Fatal(err)
 		}

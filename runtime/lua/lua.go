@@ -21,7 +21,7 @@ type Runtime struct {
 	cmd *cobra.Command
 }
 
-func (lr *Runtime) Initialize(cmd *cobra.Command, args map[string]string, c config.GeneratorConfig){
+func (lr *Runtime) Initialize(cmd *cobra.Command, args map[string]string, c config.GeneratorConfig) {
 	lr.cmd = cmd
 	flags := glua.LTable{}
 	getFlags(&flags, lr.cmd.Flags())
