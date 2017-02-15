@@ -21,7 +21,7 @@ type Runtime struct {
 	cmd *cobra.Command
 }
 
-func (lr *Runtime) Initialize(cmd *cobra.Command, args map[string]string, c config.GeneratorConfig) {
+func (lr *Runtime) Initialize(cmd *cobra.Command, args map[string]string, c config.ToolConfig) {
 	lr.cmd = cmd
 	flags := glua.LTable{}
 	getFlags(&flags, lr.cmd.Flags())
@@ -47,7 +47,7 @@ func (lr *Runtime) Run() error {
 	defer lr.l.Close()
 	script := fmt.Sprintf(
 		"package.path =\"%s\" .. [[%s?.lua]]",
-		viper.GetString(fmt.Sprintf("plis.generators.%s.root", lr.cmd.Name())),
+		viper.GetString(fmt.Sprintf("plis.tools.%s.root", lr.cmd.Name())),
 		afero.FilePathSeparator,
 	)
 	script += "\n" + string(d)
@@ -73,7 +73,7 @@ func NewLuaRuntime(fs afero.Fs) *Runtime {
 		fs: fs,
 	}
 }
-func getArguments(tb *glua.LTable, args []config.GeneratorArgs, argsMap map[string]string) {
+func getArguments(tb *glua.LTable, args []config.ToolArgs, argsMap map[string]string) {
 	for _, v := range args {
 		if argsMap[v.Name] == "" && v.Required == false {
 			switch v.Type {

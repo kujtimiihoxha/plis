@@ -1,4 +1,4 @@
-// Copyright © 2017 NAME HERE <EMAIL ADDRESS>
+// Copyright © 2017 Kujtim Hoxha <kujtimii.h@gmail.com>
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -20,7 +20,7 @@ import (
 	"github.com/asaskevich/govalidator"
 	"github.com/kujtimiihoxha/plis/cmd"
 	"github.com/kujtimiihoxha/plis/config"
-	"github.com/kujtimiihoxha/plis/generators"
+	"github.com/kujtimiihoxha/plis/tools"
 	"github.com/kujtimiihoxha/plis/helpers"
 	"github.com/kujtimiihoxha/plis/logger"
 	"github.com/spf13/afero"
@@ -36,7 +36,7 @@ func main() {
 	configDefaults()
 	initFirstRun()
 	logger.SetLevel(logrus.WarnLevel)
-	generators.Initialize()
+	tools.Initialize()
 	cmd.Execute()
 }
 func initFirstRun() {
@@ -54,7 +54,7 @@ func initFirstRun() {
 		logger.GetLogger().Info(fmt.Sprintf(
 			"Creating plis root in `%s`...",
 			viper.GetString("plis.dir.root")))
-		err := os.MkdirAll(viper.GetString("plis.dir.root")+afero.FilePathSeparator+"generators", os.ModePerm)
+		err := os.MkdirAll(viper.GetString("plis.dir.root")+afero.FilePathSeparator+"tools", os.ModePerm)
 		if err != nil {
 			logger.GetLogger().Fatal(err)
 		}
@@ -76,8 +76,8 @@ func configDefaults() {
 	}
 	viper.Set("plis.dir.user", usr.HomeDir)
 	viper.Set("plis.dir.root", usr.HomeDir+string(filepath.Separator)+".plis")
-	viper.Set("plis.dir.generators", usr.HomeDir+string(filepath.Separator)+".plis"+
-		string(filepath.Separator)+"generators")
+	viper.Set("plis.dir.tools", usr.HomeDir+string(filepath.Separator)+".plis"+
+		string(filepath.Separator)+"tools")
 }
 func setupConfigValidator() {
 	govalidator.CustomTypeTagMap.Set("inputType", govalidator.CustomTypeValidator(func(i interface{}, o interface{}) bool {

@@ -31,21 +31,21 @@ import (
 // getCmd represents the get command
 var getCmd = &cobra.Command{
 	Use:   "get",
-	Short: "Get a generator from a git repository",
-	Long:  `Get a generator from a git repository`,
+	Short: "Get a tool from a git repository",
+	Long:  `Get a tool from a git repository`,
 	Run: func(cmd *cobra.Command, args []string) {
-		getGenerator(args[0], viper.GetString("plis.get.branch"))
+		getTool(args[0], viper.GetString("plis.get.branch"))
 	},
 }
 
-func getGenerator(rep string, branch string) {
-	dir := checkIfGeneratorFolderExists()
+func getTool(rep string, branch string) {
+	dir := checkIfToolFolderExists()
 	repository := strings.Split(rep, "/")
 	gen := repository[len(repository)-1]
 	gen = strings.TrimSuffix(gen, ".git")
 	b, _ := afero.Exists(fs.GetCurrentFs(), dir+afero.FilePathSeparator+gen)
 	if b {
-		logger.GetLogger().Warn("A generator with the same name already exists")
+		logger.GetLogger().Warn("A tool with the same name already exists")
 		return
 	}
 	dir += afero.FilePathSeparator + gen
@@ -111,40 +111,40 @@ func getGenerator(rep string, branch string) {
 		installDependencies(viper.GetBool("plis.get.global"), dir)
 	}
 }
-func checkIfGeneratorFolderExists() string {
+func checkIfToolFolderExists() string {
 	if viper.GetBool("plis.get.global") {
 		//fsAPI := api.NewFsAPI(fs.GetPlisRootFs())
 		_fs := fs.GetPlisRootFs()
-		b, err := afero.Exists(_fs, "generators")
+		b, err := afero.Exists(_fs, "tools")
 		if err != nil {
 			logger.GetLogger().Fatal(err)
 		}
 		if !b {
-			err = _fs.Mkdir("generators", os.ModePerm)
+			err = _fs.Mkdir("tools", os.ModePerm)
 			if err != nil {
 				logger.GetLogger().Fatal(err)
 			}
 		}
 
-		return viper.GetString("plis.dir.generators")
+		return viper.GetString("plis.dir.tools")
 	}
 	//fsAPI := api.NewFsAPI(fs.GetCurrentFs())
 	_fs := fs.GetCurrentFs()
-	b, err := afero.Exists(_fs, fmt.Sprintf("plis%sgenerators", afero.FilePathSeparator))
+	b, err := afero.Exists(_fs, fmt.Sprintf("plis%stools", afero.FilePathSeparator))
 	if err != nil {
 		logger.GetLogger().Fatal(err)
 	}
 	if !b {
-		err = _fs.MkdirAll(fmt.Sprintf("plis%sgenerators", afero.FilePathSeparator), os.ModePerm)
+		err = _fs.MkdirAll(fmt.Sprintf("plis%stools", afero.FilePathSeparator), os.ModePerm)
 		if err != nil {
 			logger.GetLogger().Fatal(err)
 		}
 	}
-	return "plis" + afero.FilePathSeparator + "generators"
+	return "plis" + afero.FilePathSeparator + "tools"
 }
 func init() {
-	getCmd.Flags().BoolP("global", "g", false, "Use if the generator should be installed globally")
-	getCmd.Flags().StringP("branch", "b", "", "Use if you want to get a specific branch of the generator")
+	getCmd.Flags().BoolP("global", "g", false, "Use if the tool should be installed globally")
+	getCmd.Flags().StringP("branch", "b", "", "Use if you want to get a specific branch of the tool")
 	viper.BindPFlag("plis.get.global", getCmd.Flags().Lookup("global"))
 	viper.BindPFlag("plis.get.branch", getCmd.Flags().Lookup("branch"))
 	RootCmd.AddCommand(getCmd)

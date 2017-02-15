@@ -57,7 +57,7 @@ func installDependencies(global bool, path string) {
 		return
 	}
 	for _, v := range plisConfig.Dependencies {
-		getGenerator(v.Repository, v.Branch)
+		getTool(v.Repository, v.Branch)
 	}
 }
 

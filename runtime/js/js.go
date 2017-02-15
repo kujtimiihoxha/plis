@@ -21,7 +21,7 @@ type Runtime struct {
 	modules map[string]*otto.Object
 }
 
-func (js *Runtime) Initialize(cmd *cobra.Command, args map[string]string, c config.GeneratorConfig) {
+func (js *Runtime) Initialize(cmd *cobra.Command, args map[string]string, c config.ToolConfig) {
 	js.cmd = cmd
 	js.vm = otto.New()
 	flags, _ := js.vm.Call("new Object", nil)
@@ -58,7 +58,7 @@ func (js *Runtime) Run() error {
 	}
 	return nil
 }
-func getArguments(tb *otto.Object, args []config.GeneratorArgs, argsMap map[string]string) {
+func getArguments(tb *otto.Object, args []config.ToolArgs, argsMap map[string]string) {
 	for _, v := range args {
 		if argsMap[v.Name] == "" && v.Required == false {
 			switch v.Type {
