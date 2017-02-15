@@ -11,6 +11,7 @@ import (
 	"github.com/kujtimiihoxha/plis/logger"
 	"strconv"
 	"github.com/kujtimiihoxha/plis/api"
+	"github.com/kujtimiihoxha/plis/fs"
 )
 
 type Runtime struct {
@@ -29,6 +30,14 @@ func (js *Runtime) Initialize(cmd *cobra.Command, args map[string]string, c conf
 	getArguments(a.Object(),c.Args,args)
 	js.modules =map[string]*otto.Object{}
 	js.modules["plis"] = modules.NewPlisModule(flags.Object(),a.Object(),api.NewPlisAPI(js.cmd)).ModuleLoader(js.vm)
+	js.modules["fileSystem"] = modules.NewFileSystemModule(api.NewFsAPI(fs.GetCurrentFs())).ModuleLoader(js.vm)
+	js.modules["json"] = modules.NewJSONModule().ModuleLoader(js.vm)
+	js.modules["template"] = modules.NewTemplatesModule(
+		api.NewTemplatesAPI(
+			api.NewFsAPI(afero.NewBasePathFs(js.fs, "templates")),
+			api.NewFsAPI(fs.GetCurrentFs()),
+		),
+	).ModuleLoader(js.vm)
 	js.vm.Set("require",js.require)
 }
 func (js *Runtime) Run() error {
@@ -139,16 +148,20 @@ func (js *Runtime) require(call otto.FunctionCall) otto.Value {
 	if m:=js.modules[file]; m != nil{
 		return m.Value()
 	}
+	ex,_ := afero.Exists(js.fs,file)
+	if !ex {
+		ex,_ = afero.Exists(js.fs, file + ".js")
+		if ex {
+			file = file + ".js"
+		}
+	}
 	data, err := afero.ReadFile(js.fs,file)
 	if err != nil {
-		fmt.Println(err)
-		panic(err)
+		return otto.UndefinedValue()
 	}
 	v, err := call.Otto.Run(string(data))
-	fmt.Println(string(data))
 	if err != nil {
-		fmt.Println(err)
-		panic(err)
+		return otto.UndefinedValue()
 	}
 	return v.Object().Value()
 }

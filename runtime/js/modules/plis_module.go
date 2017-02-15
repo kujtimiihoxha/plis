@@ -3,6 +3,7 @@ package modules
 import (
 	"github.com/robertkrimen/otto"
 	"github.com/kujtimiihoxha/plis/api"
+	"github.com/kujtimiihoxha/plis/logger"
 )
 
 type PlisModule struct {
@@ -28,8 +29,8 @@ func (p *PlisModule) runPlisCmd(call otto.FunctionCall) otto.Value  {
 	pCmd := call.Argument(0).String()
 	args := call.Argument(1)
 	if !args.IsObject() {
-		v,_:= otto.ToValue("The arguments must be an array")
-		return v
+		logger.GetLogger().Error("The arguments must be an array")
+		return otto.FalseValue()
 	}
 	s := []string{}
 	for _, a := range args.Object().Keys() {
@@ -37,10 +38,10 @@ func (p *PlisModule) runPlisCmd(call otto.FunctionCall) otto.Value  {
 		s = append(s, vl.String())
 	}
 	if err := p.plisAPI.RunPlisCmd(pCmd,s); err != nil {
-		v,_:= otto.ToValue(err.Error())
-		return v
+		logger.GetLogger().Errorf("Error while exectuing plis command: %s",err.Error())
+		return otto.FalseValue()
 	}
-	return otto.Value{}
+	return otto.TrueValue()
 }
 
 func NewPlisModule(flags *otto.Object, args *otto.Object, api *api.PlisAPI) *PlisModule {
