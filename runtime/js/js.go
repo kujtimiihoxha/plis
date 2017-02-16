@@ -31,7 +31,7 @@ func (js *Runtime) Initialize(cmd *cobra.Command, args map[string]string, c conf
 	js.modules["plis"] = modules.NewPlisModule(flags.Object(), a.Object(), api.NewPlisAPI(js.cmd)).ModuleLoader(js.vm)
 	js.modules["fileSystem"] = modules.NewFileSystemModule(api.NewFsAPI(fs.GetCurrentFs())).ModuleLoader(js.vm)
 	js.modules["json"] = modules.NewJSONModule().ModuleLoader(js.vm)
-	js.modules["template"] = modules.NewTemplatesModule(
+	js.modules["templates"] = modules.NewTemplatesModule(
 		api.NewTemplatesAPI(
 			api.NewFsAPI(afero.NewBasePathFs(js.fs, "templates")),
 			api.NewFsAPI(fs.GetCurrentFs()),
@@ -51,7 +51,7 @@ func (js *Runtime) Run() error {
 	if v, err := js.vm.Call("main", nil); err != nil {
 		logger.GetLogger().Fatal(err)
 	} else {
-		if !(v.IsNaN() || v.IsNull() || v.IsUndefined()) {
+		if !( v.IsNull() || v.IsUndefined()) {
 			logger.GetLogger().Fatal(v.String())
 		}
 	}
