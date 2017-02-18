@@ -8,14 +8,33 @@ import (
 	"os"
 	"path/filepath"
 	"strings"
+	"io"
+	"bytes"
 )
 
 type TemplateAPI struct {
 	templateFs *FsAPI
 	currentFs  *FsAPI
 }
+type PlisTemplateLoader struct {
+	fsAPI *FsAPI
+}
 
+func (ptl *PlisTemplateLoader) Abs(base, name string) string  {
+	return name
+}
+func (ptl *PlisTemplateLoader) Get(path string) (io.Reader, error)  {
+	b,err:=afero.ReadFile(ptl.fsAPI.fs,path)
+	r := bytes.NewReader(b)
+	return r,err
+}
+func (t *TemplateAPI) newTemplateLoader() *PlisTemplateLoader {
+	return &PlisTemplateLoader{
+		fsAPI:t.templateFs,
+	}
+}
 func (t *TemplateAPI) CopyTemplate(name string, destination string, model map[string]interface{}) error {
+	tpSet := pongo2.NewSet("plis_set",t.newTemplateLoader())
 	v, err := t.templateFs.ReadFile(name)
 	if err != nil {
 		return err
@@ -27,7 +46,7 @@ func (t *TemplateAPI) CopyTemplate(name string, destination string, model map[st
 		}
 		return nil
 	}
-	tpl, err := pongo2.FromString(v)
+	tpl, err := tpSet.FromString(v)
 	if err != nil {
 		return err
 	}
