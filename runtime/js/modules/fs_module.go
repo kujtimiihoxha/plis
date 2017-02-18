@@ -4,6 +4,8 @@ import (
 	"github.com/kujtimiihoxha/plis/api"
 	"github.com/kujtimiihoxha/plis/logger"
 	"github.com/robertkrimen/otto"
+	"os"
+	"fmt"
 )
 
 type FileSystemModule struct {
@@ -18,6 +20,7 @@ func (fsm *FileSystemModule) ModuleLoader(vm *otto.Otto) *otto.Object {
 	v.Set("fileSeparator", fsm.fileSeparator)
 	v.Set("writeFile", fsm.writeFile)
 	v.Set("mkdir", fsm.mkdir)
+	v.Set("walk", fsm.walk)
 	v.Set("mkdirAll", fsm.mkdirAll)
 	return v
 }
@@ -80,4 +83,28 @@ func (fsm *FileSystemModule) mkdirAll(call otto.FunctionCall) otto.Value {
 		return otto.UndefinedValue()
 	}
 	return otto.TrueValue()
+}
+
+func (fsm *FileSystemModule) walk(call otto.FunctionCall) otto.Value{
+	root := call.Argument(0).String()
+	fc := call.Argument(1)
+	if !fc.IsFunction() {
+		logger.GetLogger().Errorf("Walk needs a function to call")
+		return otto.FalseValue()
+	}
+	fsm.fsAPI.Walk(root, func(path string, info os.FileInfo, err error) error {
+		inf := map[string]interface{}{}
+		inf["isDir"]=info.IsDir()
+		inf["name"]=info.Name()
+		inf["size"]=info.Size()
+		v,_:= call.Otto.ToValue(inf)
+		e := ""
+		if err != nil {
+			e = err.Error()
+		}
+		_,err=fc.Call(fc.Object().Value(),path,v,e)
+		fmt.Println(fc.Class())
+		return err
+	})
+	return otto.NullValue()
 }

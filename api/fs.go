@@ -31,6 +31,9 @@ func (f *FsAPI) FilePathSeparator() string {
 func (f *FsAPI) Exists(path string) (bool, error) {
 	return afero.Exists(f.fs, path)
 }
+func (f *FsAPI) Walk(root string, fc func(path string, info os.FileInfo, err error) error)  error{
+	return afero.Walk(f.fs, root, fc)
+}
 func NewFsAPI(fs afero.Fs) *FsAPI {
 	return &FsAPI{
 		fs: fs,

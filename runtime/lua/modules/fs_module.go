@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"github.com/kujtimiihoxha/plis/api"
 	"github.com/yuin/gopher-lua"
+	"os"
 )
 
 type FileSystemModule struct {
@@ -25,6 +26,7 @@ func (fsm *FileSystemModule) InitializeModule() map[string]lua.LGFunction {
 		"mkdirAll":      fsm.mkdirAll,
 		"fileSeparator": fsm.fileSeparator,
 		"exists":        fsm.exists,
+		"walk":        fsm.walk,
 	}
 }
 
@@ -87,5 +89,27 @@ func (fsm *FileSystemModule) mkdirAll(L *lua.LState) int {
 		L.Push(lua.LString(fmt.Sprintf("Could not create directories file : '%s'", err)))
 		return 1
 	}
+	return 0
+}
+
+func (fsm *FileSystemModule) walk(L *lua.LState) int {
+	root := L.CheckString(1)
+	fc := L.CheckFunction(2)
+	inf := L.NewTable()
+	fsm.fsAPI.Walk(root, func(path string, info os.FileInfo, err error) error {
+		inf.RawSet(lua.LString("isDir"),lua.LBool(info.IsDir()))
+		inf.RawSet(lua.LString("name"),lua.LString(info.Name()))
+		inf.RawSet(lua.LString("size"),lua.LNumber(info.Size()))
+		e := ""
+		if err != nil {
+			e = err.Error()
+		}
+		err = L.CallByParam(lua.P{
+			Fn:fc,
+			NRet:0,
+			Protect:true,
+		},lua.LString(path),inf,lua.LString(e))
+		return nil
+	})
 	return 0
 }
