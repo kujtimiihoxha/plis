@@ -11,6 +11,11 @@ If not you can download a build of plis.
 ## Docs.
 In depth documentation and instructions on plis API and how to create your own tools
  [Plis Docs](https://plis.readme.io/docs)
+
+## Example of a plis tool
+The first tool created with plis is a tool to create plis tools :laughing: 
+
+[plis-tool](https://github.com/kujtimiihoxha/plis-tool)
 ## Contribute
 Thank you for contributing.
 
