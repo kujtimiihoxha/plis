@@ -11,6 +11,23 @@ type TemplatesModule struct {
 	templatesAPI *api.TemplateAPI
 }
 
+func (t *TemplatesModule) readTemplate(L *lua.LState) int {
+	tplName := L.CheckString(1)
+	tplModel := L.CheckTable(3)
+	model := map[string]interface{}{}
+	tplModel.ForEach(func(key lua.LValue, value lua.LValue) {
+		model[helpers.ToCamelCaseOrUnderscore(helpers.ToGoValue(key).(string))] = helpers.ToGoValue(value)
+	})
+	v, err := t.templatesAPI.ReadTemplate(tplName, model)
+	if err != nil {
+		L.Push(lua.LNil)
+		L.Push(lua.LString(fmt.Sprintf("Could not copy template : '%s'", err)))
+		return 2
+	}
+	L.Push(lua.LString(v))
+	return 1
+}
+
 func (t *TemplatesModule) copyTemplate(L *lua.LState) int {
 	tplName := L.CheckString(1)
 	tplDestination := L.CheckString(2)
@@ -62,6 +79,7 @@ func (t *TemplatesModule) InitializeModule() map[string]lua.LGFunction {
 	return map[string]lua.LGFunction{
 		"copyTemplate":       t.copyTemplate,
 		"copyTemplateFolder": t.copyTemplateFolder,
+		"readTemplate":       t.readTemplate,
 	}
 }
 

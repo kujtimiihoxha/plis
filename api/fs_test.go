@@ -27,7 +27,7 @@ func TestFsAPI_WriteFile(t *testing.T) {
 	memFs := afero.NewMemMapFs()
 	fsAPI := NewFsAPI(memFs)
 	Convey("Check if FsAPI writes files without errors.", t, func() {
-		err := fsAPI.WriteFile("test.txt", fileData)
+		err := fsAPI.WriteFile("test.txt", fileData, false)
 		So(err, ShouldBeNil)
 	})
 }
@@ -83,4 +83,49 @@ func TestFsAPI_Exists(t *testing.T) {
 			So(b, ShouldBeTrue)
 		})
 	})
+}
+
+func TestFsAPI_Walk(t *testing.T) {
+	memFs := afero.NewMemMapFs()
+	memFs.MkdirAll("test_folder/test1/test2", os.ModePerm)
+	afero.WriteFile(memFs, "test_folder/test1/test1.txt", []byte("Hello"), os.ModePerm)
+	afero.WriteFile(memFs, "test_folder/test_folder.txt", []byte("Hello"), os.ModePerm)
+	fsAPI := NewFsAPI(memFs)
+	Convey("Check if FsAPI walks through all files.", t, func() {
+		shouldWalk := []string{
+			"test_folder",
+			"test_folder/test1",
+			"test_folder/test1/test1.txt",
+			"test_folder/test1/test2",
+			"test_folder/test_folder.txt",
+		}
+		walk := []string{}
+		fsAPI.Walk("test_folder", func(path string, info os.FileInfo, err error) error {
+			walk = append(walk, path)
+			return nil
+		})
+		So(testEq(walk, shouldWalk), ShouldBeTrue)
+	})
+}
+func testEq(a, b []string) bool {
+
+	if a == nil && b == nil {
+		return true
+	}
+
+	if a == nil || b == nil {
+		return false
+	}
+
+	if len(a) != len(b) {
+		return false
+	}
+
+	for i := range a {
+		if a[i] != b[i] {
+			return false
+		}
+	}
+
+	return true
 }

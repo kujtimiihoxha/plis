@@ -27,13 +27,13 @@ func AddRuntime(cmd *cobra.Command, c config.ToolConfig, rt RTime) {
 		switch c.ScriptType {
 
 		}
-		rt.Initialize(cmd, createFlagMap(args, c.Args), c)
+		rt.Initialize(cmd, createArgumentMap(args, c.Args), c)
 	}
 	cmd.RunE = func(cd *cobra.Command, args []string) error {
 		return rt.Run()
 	}
 }
-func createFlagMap(args []string, cnfArgs []config.ToolArgs) (m map[string]string) {
+func createArgumentMap(args []string, cnfArgs []config.ToolArgs) (m map[string]string) {
 	i := 0
 	m = make(map[string]string)
 	for _, v := range cnfArgs {
@@ -47,6 +47,18 @@ func createFlagMap(args []string, cnfArgs []config.ToolArgs) (m map[string]strin
 			if i <= len(args)-1 {
 				m[v.Name] = args[i]
 				i++
+			}
+		}
+	}
+	for _, v := range cnfArgs {
+		if m[v.Name] == "" {
+			switch v.Type {
+			case "int":
+				m[v.Name] = "0"
+			case "float":
+				m[v.Name] = "0.0"
+			case "bool":
+				m[v.Name] = "false"
 			}
 		}
 	}

@@ -33,6 +33,25 @@ func (t *TemplateAPI) newTemplateLoader() *PlisTemplateLoader {
 		fsAPI: t.templateFs,
 	}
 }
+func (t *TemplateAPI) ReadTemplate(name string, model map[string]interface{}) (string, error) {
+	tpSet := pongo2.NewSet("plis_set", t.newTemplateLoader())
+	v, err := t.templateFs.ReadFile(name)
+	if err != nil {
+		return "", err
+	}
+	if len(model) == 0 {
+		return v, nil
+	}
+	tpl, err := tpSet.FromString(v)
+	if err != nil {
+		return "", err
+	}
+	out, err := tpl.Execute(pongo2.Context(model))
+	if err != nil {
+		return "", err
+	}
+	return out, nil
+}
 func (t *TemplateAPI) CopyTemplate(name string, destination string, model map[string]interface{}) error {
 	tpSet := pongo2.NewSet("plis_set", t.newTemplateLoader())
 	v, err := t.templateFs.ReadFile(name)
@@ -40,7 +59,7 @@ func (t *TemplateAPI) CopyTemplate(name string, destination string, model map[st
 		return err
 	}
 	if len(model) == 0 {
-		err = t.currentFs.WriteFile(destination, v)
+		err = t.currentFs.WriteFile(destination, v, false)
 		if err != nil {
 			return err
 		}
@@ -54,7 +73,7 @@ func (t *TemplateAPI) CopyTemplate(name string, destination string, model map[st
 	if err != nil {
 		return err
 	}
-	err = t.currentFs.WriteFile(destination, out)
+	err = t.currentFs.WriteFile(destination, out, false)
 	if err != nil {
 		return err
 	}

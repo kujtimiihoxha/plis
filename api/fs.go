@@ -18,9 +18,9 @@ func (f *FsAPI) ReadFile(path string) (string, error) {
 	return string(d), err
 }
 
-func (f *FsAPI) WriteFile(path string, data string) error {
+func (f *FsAPI) WriteFile(path string, data string, force bool) error {
 
-	if b, _ := f.Exists(path); b && !viper.GetBool("plis.fs.force_override") {
+	if b, _ := f.Exists(path); b && !(viper.GetBool("plis.fs.force_override") || force) {
 		s, _ := f.ReadFile(path)
 		if s == data {
 			logger.GetLogger().Warnf("`%s` exists and is identical it will be ignored", path)
