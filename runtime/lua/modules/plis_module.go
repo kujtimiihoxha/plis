@@ -32,6 +32,11 @@ func (p *PlisModule) help(L *lua.LState) int {
 	p.plisAPI.Help()
 	return 0
 }
+func (p *PlisModule) forceOverride(L *lua.LState) int {
+	b := L.CheckBool(1)
+	p.plisAPI.ForceOverride(b)
+	return 0
+}
 func (p *PlisModule) runPlisCmd(L *lua.LState) int {
 	pCmd := L.CheckString(1)
 	args := L.CheckAny(2)

@@ -25,6 +25,11 @@ func (p *PlisModule) help(call otto.FunctionCall) otto.Value {
 	p.plisAPI.Help()
 	return otto.Value{}
 }
+func (p *PlisModule) forceOverride(call otto.FunctionCall) otto.Value {
+	b,_ := call.Argument(0).ToBoolean()
+	p.plisAPI.ForceOverride(b)
+	return otto.TrueValue()
+}
 func (p *PlisModule) runPlisCmd(call otto.FunctionCall) otto.Value {
 	pCmd := call.Argument(0).String()
 	args := call.Argument(1)

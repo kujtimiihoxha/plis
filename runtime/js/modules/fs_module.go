@@ -103,7 +103,6 @@ func (fsm *FileSystemModule) walk(call otto.FunctionCall) otto.Value{
 			e = err.Error()
 		}
 		_,err=fc.Call(fc.Object().Value(),path,v,e)
-		fmt.Println(fc.Class())
 		return err
 	})
 	return otto.NullValue()
