@@ -1,7 +1,7 @@
 # Plis
 Plis is an application used to create and run cli tools, plis is created to make it easy for you to create tools for 
 automating tasks that you do repeatedly , creating code, and other tools for making your workflow faster.
- Examples of such tools are angular-cli, gulp, artisan(laravel).
+ Examples of such tools are `angular-cli`, `gulp`, `artisan(laravel)`.
 ## Installing Plis.
 If you have go installed you can install plis just by running:
 ```bash
