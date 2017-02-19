@@ -42,7 +42,11 @@ func (fsm *FileSystemModule) readFile(call otto.FunctionCall) otto.Value {
 func (fsm *FileSystemModule) writeFile(call otto.FunctionCall) otto.Value {
 	path := call.Argument(0).String()
 	data := call.Argument(1).String()
-	err := fsm.fsAPI.WriteFile(path, data)
+	b,err := call.Argument(2).ToBoolean()
+	if err != nil{
+		b = false
+	}
+	err = fsm.fsAPI.WriteFile(path, data,b)
 	if err != nil {
 		logger.GetLogger().Errorf("Could not write file : '%s'", err)
 		return otto.UndefinedValue()

@@ -15,7 +15,28 @@ func (t *TemplatesModule) ModuleLoader(vm *otto.Otto) *otto.Object {
 	v := obj.Object()
 	v.Set("copyTemplate", t.copyTemplate)
 	v.Set("copyTemplateFolder", t.copyTemplateFolder)
+	v.Set("readTemplate", t.readTemplate)
 	return v
+}
+func (t *TemplatesModule) readTemplate(call otto.FunctionCall) otto.Value {
+	tplName := call.Argument(0).String()
+	tplModel, _ := call.Argument(2).Export()
+	if tplModel == nil {
+		logger.GetLogger().Error("You must provide a model")
+		return otto.FalseValue()
+	}
+	model, ok := tplModel.(map[string]interface{})
+	if !ok {
+		logger.GetLogger().Error("The template model must be an object")
+		return otto.FalseValue()
+	}
+	v,err := t.templatesAPI.ReadTemplate(tplName, model)
+	if err != nil {
+		logger.GetLogger().Errorf("Error while copying template :%s", err.Error())
+		return otto.FalseValue()
+	}
+	vl,_ :=  otto.ToValue(v)
+	return vl
 }
 func (t *TemplatesModule) copyTemplate(call otto.FunctionCall) otto.Value {
 	tplName := call.Argument(0).String()
