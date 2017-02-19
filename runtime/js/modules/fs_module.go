@@ -84,7 +84,7 @@ func (fsm *FileSystemModule) mkdirAll(call otto.FunctionCall) otto.Value {
 	return otto.TrueValue()
 }
 
-func (fsm *FileSystemModule) walk(call otto.FunctionCall) otto.Value{
+func (fsm *FileSystemModule) walk(call otto.FunctionCall) otto.Value {
 	root := call.Argument(0).String()
 	fc := call.Argument(1)
 	if !fc.IsFunction() {
@@ -93,15 +93,15 @@ func (fsm *FileSystemModule) walk(call otto.FunctionCall) otto.Value{
 	}
 	fsm.fsAPI.Walk(root, func(path string, info os.FileInfo, err error) error {
 		inf := map[string]interface{}{}
-		inf["isDir"]=info.IsDir()
-		inf["name"]=info.Name()
-		inf["size"]=info.Size()
-		v,_:= call.Otto.ToValue(inf)
+		inf["isDir"] = info.IsDir()
+		inf["name"] = info.Name()
+		inf["size"] = info.Size()
+		v, _ := call.Otto.ToValue(inf)
 		e := ""
 		if err != nil {
 			e = err.Error()
 		}
-		_,err=fc.Call(fc.Object().Value(),path,v,e)
+		_, err = fc.Call(fc.Object().Value(), path, v, e)
 		return err
 	})
 	return otto.NullValue()

@@ -54,11 +54,11 @@ func installDependencies(global bool, path string) {
 		logger.GetLogger().Error("Could not decode plis configurations : ", err)
 		return
 	}
-	viper.Set("plis.ommit.dependency",true)
+	viper.Set("plis.ommit.dependency", true)
 	for _, v := range plisConfig.Dependencies {
 		getTool(v.Repository, v.Branch)
 	}
-	viper.Set("plis.ommit.dependency",false)
+	viper.Set("plis.ommit.dependency", false)
 
 }
 

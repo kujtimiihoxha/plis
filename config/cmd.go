@@ -11,14 +11,14 @@ var (
 )
 
 type ToolConfig struct {
-	Name            string          `json:"name" valid:"required"`
-	Description     string          `json:"description" valid:"required"`
-	LongDescription []string        `json:"long_description"`
-	Aliases         []string        `json:"aliases"`
+	Name            string     `json:"name" valid:"required"`
+	Description     string     `json:"description" valid:"required"`
+	LongDescription []string   `json:"long_description"`
+	Aliases         []string   `json:"aliases"`
 	Args            []ToolArgs `json:"args"`
 	Flags           []ToolFlag `json:"flags"`
-	SubCommands     []string        `json:"sub_commands"`
-	ScriptType      string          `json:"script_type" valid:"scriptType,required"`
+	SubCommands     []string   `json:"sub_commands"`
+	ScriptType      string     `json:"script_type" valid:"scriptType,required"`
 }
 type ToolProjectConfig struct {
 	ToolName     string           `json:"tool_name" valid:"required"`

@@ -51,7 +51,7 @@ func (js *Runtime) Run() error {
 	if v, err := js.vm.Call("main", nil); err != nil {
 		logger.GetLogger().Fatal(err)
 	} else {
-		if !( v.IsNull() || v.IsUndefined()) {
+		if !(v.IsNull() || v.IsUndefined()) {
 			logger.GetLogger().Fatal(v.String())
 		}
 	}

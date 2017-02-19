@@ -1,15 +1,15 @@
 package api
 
 import (
+	"bytes"
 	"github.com/flosch/pongo2"
 	"github.com/kujtimiihoxha/plis/fs"
 	"github.com/ryanuber/go-glob"
 	"github.com/spf13/afero"
+	"io"
 	"os"
 	"path/filepath"
 	"strings"
-	"io"
-	"bytes"
 )
 
 type TemplateAPI struct {
@@ -20,21 +20,21 @@ type PlisTemplateLoader struct {
 	fsAPI *FsAPI
 }
 
-func (ptl *PlisTemplateLoader) Abs(base, name string) string  {
+func (ptl *PlisTemplateLoader) Abs(base, name string) string {
 	return name
 }
-func (ptl *PlisTemplateLoader) Get(path string) (io.Reader, error)  {
-	b,err:=afero.ReadFile(ptl.fsAPI.fs,path)
+func (ptl *PlisTemplateLoader) Get(path string) (io.Reader, error) {
+	b, err := afero.ReadFile(ptl.fsAPI.fs, path)
 	r := bytes.NewReader(b)
-	return r,err
+	return r, err
 }
 func (t *TemplateAPI) newTemplateLoader() *PlisTemplateLoader {
 	return &PlisTemplateLoader{
-		fsAPI:t.templateFs,
+		fsAPI: t.templateFs,
 	}
 }
 func (t *TemplateAPI) CopyTemplate(name string, destination string, model map[string]interface{}) error {
-	tpSet := pongo2.NewSet("plis_set",t.newTemplateLoader())
+	tpSet := pongo2.NewSet("plis_set", t.newTemplateLoader())
 	v, err := t.templateFs.ReadFile(name)
 	if err != nil {
 		return err
