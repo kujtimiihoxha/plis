@@ -16,12 +16,12 @@ package cmd
 
 import (
 	"encoding/json"
-	"fmt"
 	"github.com/kujtimiihoxha/plis/config"
 	"github.com/kujtimiihoxha/plis/fs"
 	"github.com/kujtimiihoxha/plis/logger"
 	"github.com/spf13/afero"
 	"github.com/spf13/cobra"
+	"github.com/spf13/viper"
 )
 
 // installCmd represents the install command
@@ -35,8 +35,6 @@ var installCmd = &cobra.Command{
 }
 
 func installDependencies(global bool, path string) {
-	fmt.Println(path)
-	//fsApi := api.NewFsAPI(fs.GetCurrentFs())
 	_fs := fs.GetCurrentFs()
 	if path != "" {
 		if !global {
@@ -56,9 +54,12 @@ func installDependencies(global bool, path string) {
 		logger.GetLogger().Error("Could not decode plis configurations : ", err)
 		return
 	}
+	viper.Set("plis.ommit.dependency",true)
 	for _, v := range plisConfig.Dependencies {
 		getTool(v.Repository, v.Branch)
 	}
+	viper.Set("plis.ommit.dependency",false)
+
 }
 
 func init() {
