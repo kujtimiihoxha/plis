@@ -26,7 +26,7 @@ func (p *PlisModule) help(call otto.FunctionCall) otto.Value {
 	return otto.Value{}
 }
 func (p *PlisModule) forceOverride(call otto.FunctionCall) otto.Value {
-	b,_ := call.Argument(0).ToBoolean()
+	b, _ := call.Argument(0).ToBoolean()
 	p.plisAPI.ForceOverride(b)
 	return otto.TrueValue()
 }

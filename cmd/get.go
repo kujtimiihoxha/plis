@@ -64,7 +64,7 @@ func getTool(rep string, branch string) {
 	if err != nil {
 		logger.GetLogger().Error(err)
 	}
-	if !viper.GetBool("plis.get.global") && !viper.GetBool("plis.ommit.dependency"){
+	if !viper.GetBool("plis.get.global") && !viper.GetBool("plis.ommit.dependency") {
 		_fs := fs.GetCurrentFs()
 		b, err := afero.Exists(_fs, "plis.json")
 		if err != nil {

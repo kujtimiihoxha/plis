@@ -18,8 +18,8 @@ func NewPlisAPI(cmd *cobra.Command) *PlisAPI {
 		cmd: cmd,
 	}
 }
-func  (p *PlisAPI) ForceOverride(b bool) {
-	viper.Set("plis.fs.force_rewrite",b)
+func (p *PlisAPI) ForceOverride(b bool) {
+	viper.Set("plis.fs.force_rewrite", b)
 }
 func (p *PlisAPI) RunPlisCmd(pCmd string, s []string) error {
 	c := []string{
