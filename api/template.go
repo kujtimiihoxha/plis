@@ -33,7 +33,7 @@ func (t *TemplateAPI) newTemplateLoader() *PlisTemplateLoader {
 		fsAPI: t.templateFs,
 	}
 }
-func (t *TemplateAPI) ReadTemplate(name string, model map[string]interface{}) (string,error) {
+func (t *TemplateAPI) ReadTemplate(name string, model map[string]interface{}) (string, error) {
 	tpSet := pongo2.NewSet("plis_set", t.newTemplateLoader())
 	v, err := t.templateFs.ReadFile(name)
 	if err != nil {
@@ -50,7 +50,7 @@ func (t *TemplateAPI) ReadTemplate(name string, model map[string]interface{}) (s
 	if err != nil {
 		return "", err
 	}
-	return out,nil
+	return out, nil
 }
 func (t *TemplateAPI) CopyTemplate(name string, destination string, model map[string]interface{}) error {
 	tpSet := pongo2.NewSet("plis_set", t.newTemplateLoader())

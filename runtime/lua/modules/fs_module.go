@@ -67,7 +67,7 @@ func (fsm *FileSystemModule) writeFile(L *lua.LState) int {
 	path := L.CheckString(1)
 	data := L.CheckString(2)
 	b := L.ToBool(3)
-	err := fsm.fsAPI.WriteFile(path, data,b)
+	err := fsm.fsAPI.WriteFile(path, data, b)
 	if err != nil {
 		L.Push(lua.LString(fmt.Sprintf("Could not write file : '%s'", err)))
 		return 1

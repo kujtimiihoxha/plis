@@ -50,7 +50,7 @@ func createArgumentMap(args []string, cnfArgs []config.ToolArgs) (m map[string]s
 			}
 		}
 	}
-	for _,v :=range cnfArgs {
+	for _, v := range cnfArgs {
 		if m[v.Name] == "" {
 			switch v.Type {
 			case "int":

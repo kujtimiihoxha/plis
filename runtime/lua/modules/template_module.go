@@ -10,6 +10,7 @@ import (
 type TemplatesModule struct {
 	templatesAPI *api.TemplateAPI
 }
+
 func (t *TemplatesModule) readTemplate(L *lua.LState) int {
 	tplName := L.CheckString(1)
 	tplModel := L.CheckTable(3)
@@ -78,7 +79,7 @@ func (t *TemplatesModule) InitializeModule() map[string]lua.LGFunction {
 	return map[string]lua.LGFunction{
 		"copyTemplate":       t.copyTemplate,
 		"copyTemplateFolder": t.copyTemplateFolder,
-		"readTemplate": t.readTemplate,
+		"readTemplate":       t.readTemplate,
 	}
 }
 

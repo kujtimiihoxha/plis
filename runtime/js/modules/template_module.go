@@ -30,12 +30,12 @@ func (t *TemplatesModule) readTemplate(call otto.FunctionCall) otto.Value {
 		logger.GetLogger().Error("The template model must be an object")
 		return otto.FalseValue()
 	}
-	v,err := t.templatesAPI.ReadTemplate(tplName, model)
+	v, err := t.templatesAPI.ReadTemplate(tplName, model)
 	if err != nil {
 		logger.GetLogger().Errorf("Error while copying template :%s", err.Error())
 		return otto.FalseValue()
 	}
-	vl,_ :=  otto.ToValue(v)
+	vl, _ := otto.ToValue(v)
 	return vl
 }
 func (t *TemplatesModule) copyTemplate(call otto.FunctionCall) otto.Value {
