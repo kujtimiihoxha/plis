@@ -25,7 +25,7 @@ func (p *PlisModule) ModuleLoader() func(L *lua.LState) int {
 func (p *PlisModule) InitializeModule() map[string]lua.LGFunction {
 	return map[string]lua.LGFunction{
 		"help":       p.help,
-		"runPlisCmd": p.runPlisCmd,
+		"runPlisTool": p.runPlisTool,
 	}
 }
 func (p *PlisModule) help(L *lua.LState) int {
@@ -37,7 +37,7 @@ func (p *PlisModule) forceOverride(L *lua.LState) int {
 	p.plisAPI.ForceOverride(b)
 	return 0
 }
-func (p *PlisModule) runPlisCmd(L *lua.LState) int {
+func (p *PlisModule) runPlisTool(L *lua.LState) int {
 	pCmd := L.CheckString(1)
 	args := L.CheckAny(2)
 	v, ok := helpers.ToGoValue(args).([]interface{})
@@ -49,7 +49,7 @@ func (p *PlisModule) runPlisCmd(L *lua.LState) int {
 	for _, a := range v {
 		s = append(s, fmt.Sprint(a))
 	}
-	if err := p.plisAPI.RunPlisCmd(pCmd, s); err != nil {
+	if err := p.plisAPI.RunPlisTool(pCmd, s); err != nil {
 		L.Push(lua.LString(err.Error()))
 		return 1
 	}

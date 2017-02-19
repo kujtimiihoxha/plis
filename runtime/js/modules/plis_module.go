@@ -16,7 +16,7 @@ func (p *PlisModule) ModuleLoader(vm *otto.Otto) *otto.Object {
 	obj, _ := vm.Call("new Object", nil)
 	v := obj.Object()
 	v.Set("help", p.help)
-	v.Set("runPlisCmd", p.runPlisCmd)
+	v.Set("runPlisTool", p.runPlisTool)
 	v.Set("flags", p.flags)
 	v.Set("args", p.args)
 	return v
@@ -30,7 +30,7 @@ func (p *PlisModule) forceOverride(call otto.FunctionCall) otto.Value {
 	p.plisAPI.ForceOverride(b)
 	return otto.TrueValue()
 }
-func (p *PlisModule) runPlisCmd(call otto.FunctionCall) otto.Value {
+func (p *PlisModule) runPlisTool(call otto.FunctionCall) otto.Value {
 	pCmd := call.Argument(0).String()
 	args := call.Argument(1)
 	if !args.IsObject() {
@@ -42,7 +42,7 @@ func (p *PlisModule) runPlisCmd(call otto.FunctionCall) otto.Value {
 		vl, _ := args.Object().Get(a)
 		s = append(s, vl.String())
 	}
-	if err := p.plisAPI.RunPlisCmd(pCmd, s); err != nil {
+	if err := p.plisAPI.RunPlisTool(pCmd, s); err != nil {
 		logger.GetLogger().Errorf("Error while exectuing plis command: %s", err.Error())
 		return otto.FalseValue()
 	}
