@@ -3,6 +3,10 @@ package api
 import (
 	"github.com/spf13/afero"
 	"os"
+	"github.com/kujtimiihoxha/plis/logger"
+	"github.com/Songmu/prompter"
+	"fmt"
+	"github.com/spf13/viper"
 )
 
 type FsAPI struct {
@@ -15,6 +19,18 @@ func (f *FsAPI) ReadFile(path string) (string, error) {
 }
 
 func (f *FsAPI) WriteFile(path string, data string) error {
+
+	if b,_:=f.Exists(path); b && !viper.GetBool("plis.fs.force_override") {
+		s,_:=f.ReadFile(path)
+		if s == data {
+			logger.GetLogger().Warnf("`%s` exists and is identical it will be ignored",path)
+			return nil
+		}
+		b := prompter.YN(fmt.Sprintf("`%s` already exists do you want to override it ?",path),false)
+		if !b {
+			return nil
+		}
+	}
 	return afero.WriteFile(f.fs, path, []byte(data), os.ModePerm)
 }
 
