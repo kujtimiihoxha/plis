@@ -43,7 +43,7 @@ func TestPlisAPI_RunPlisCmd(t *testing.T) {
 		"hello",
 	}
 	Convey("Check if command is called", t, func() {
-		err := plisAPI.RunPlisCmd("test", args)
+		err := plisAPI.RunPlisTool("test", args)
 		Convey("Check if command executes without errors", func() {
 			So(err, ShouldBeNil)
 		})
