@@ -22,7 +22,8 @@ Thank you for contributing.
 If you want to contribute to plis fork the plis repository and checkout the `develop` branch, make your changes and create a
 pull request in the `develop` branch.
 ## TODO
-1. Testing, a lot of testing...
-2. Complete docs.
+ 1. Testing, a lot of testing...
+ 2. Complete docs.
+
 ##Licence 
 Apache License Version 2.0
