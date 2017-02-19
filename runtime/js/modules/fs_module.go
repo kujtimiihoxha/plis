@@ -5,7 +5,6 @@ import (
 	"github.com/kujtimiihoxha/plis/logger"
 	"github.com/robertkrimen/otto"
 	"os"
-	"fmt"
 )
 
 type FileSystemModule struct {
