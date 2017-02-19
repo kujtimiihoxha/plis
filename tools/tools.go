@@ -265,6 +265,17 @@ func checkIfToolProject() {
 			dr,
 		),
 	)
+	toRemove := []*cobra.Command{}
+	for _, gcmd := range cmd.RootCmd.Commands() {
+		if gcmd.Name() == c.ToolName {
+			logger.GetLogger().Warnf(
+				"The commandd '%s' exists as a global command it will be replaced by the project level command",
+				c.ToolName,
+			)
+			toRemove = append(toRemove, gcmd)
+		}
+	}
+	cmd.RootCmd.RemoveCommand(toRemove...)
 	createToolCmd(currentFs, cmd.RootCmd, c.ToolName)
 
 }
