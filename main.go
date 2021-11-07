@@ -16,13 +16,13 @@ package main
 
 import (
 	"fmt"
-	"github.com/Sirupsen/logrus"
 	"github.com/asaskevich/govalidator"
 	"github.com/kujtimiihoxha/plis/cmd"
 	"github.com/kujtimiihoxha/plis/config"
 	"github.com/kujtimiihoxha/plis/helpers"
 	"github.com/kujtimiihoxha/plis/logger"
 	"github.com/kujtimiihoxha/plis/tools"
+	"github.com/sirupsen/logrus"
 	"github.com/spf13/afero"
 	"github.com/spf13/viper"
 	"os"
@@ -80,8 +80,13 @@ func configDefaults() {
 		string(filepath.Separator)+"tools")
 }
 func setupConfigValidator() {
+	govalidator.SetNilPtrAllowedByRequired(true)
+
 	govalidator.CustomTypeTagMap.Set("inputType", govalidator.CustomTypeValidator(func(i interface{}, o interface{}) bool {
 		return helpers.StringInSlice(i.(string), config.InputTypes)
+	}))
+	govalidator.CustomTypeTagMap.Set("inputDefault", govalidator.CustomTypeValidator(func(i interface{}, o interface{}) bool {
+		return true
 	}))
 	govalidator.CustomTypeTagMap.Set("scriptType", govalidator.CustomTypeValidator(func(i interface{}, o interface{}) bool {
 		return helpers.StringInSlice(i.(string), config.ScriptTypes)

@@ -24,7 +24,7 @@ func (p *PlisModule) ModuleLoader() func(L *lua.LState) int {
 }
 func (p *PlisModule) InitializeModule() map[string]lua.LGFunction {
 	return map[string]lua.LGFunction{
-		"help":       p.help,
+		"help":        p.help,
 		"runPlisTool": p.runPlisTool,
 	}
 }

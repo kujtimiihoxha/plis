@@ -3,6 +3,7 @@ package config
 import (
 	"github.com/asaskevich/govalidator"
 	"github.com/kujtimiihoxha/plis/logger"
+	"strconv"
 )
 
 var (
@@ -16,7 +17,7 @@ type ToolConfig struct {
 	LongDescription []string   `json:"long_description"`
 	Aliases         []string   `json:"aliases"`
 	Args            []ToolArgs `json:"args"`
-	Flags           []ToolFlag `json:"flags"`
+	Flags           []ToolFlag `json:"flags" valid:"-"`
 	SubCommands     []string   `json:"sub_commands"`
 	ScriptType      string     `json:"script_type" valid:"scriptType,required"`
 }
@@ -29,7 +30,7 @@ type ToolFlag struct {
 	Name        string      `json:"name" valid:"required"`
 	Description string      `json:"description" valid:"required"`
 	Type        string      `json:"type" valid:"inputType"`
-	Default     interface{} `json:"default"`
+	Default     string		`json:"default"`
 	Persistent  bool        `json:"persistent"`
 	Short       string      `json:"short" valid:"lenOne"`
 }
@@ -91,26 +92,21 @@ func (cf *ToolFlag) Validate() bool {
 func checkDefault(flag *ToolFlag) bool {
 	switch flag.Type {
 	case "string":
-		if flag.Default == nil {
-			flag.Default = ""
-		}
-		if _, ok := flag.Default.(string); ok {
-			return true
-		}
-		return false
+		return true
 	case "int", "float":
-		if flag.Default == nil {
-			flag.Default = 0.0
+		if flag.Default == "" {
+			flag.Default = "0.0"
 		}
-		if _, ok := flag.Default.(float64); ok {
+
+		if _, err := strconv.ParseFloat( flag.Default, 32); err==nil {
 			return true
 		}
 		return false
 	case "bool":
-		if flag.Default == nil {
-			flag.Default = false
+		if flag.Default == "" {
+			flag.Default = "false"
 		}
-		if _, ok := flag.Default.(bool); ok {
+		if _, err := strconv.ParseBool(flag.Default); err== nil {
 			return true
 		}
 		return false

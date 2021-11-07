@@ -3,7 +3,6 @@ package tools
 import (
 	"encoding/json"
 	"fmt"
-	"github.com/Sirupsen/logrus"
 	"github.com/asaskevich/govalidator"
 	"github.com/kujtimiihoxha/plis/cmd"
 	"github.com/kujtimiihoxha/plis/config"
@@ -13,10 +12,12 @@ import (
 	"github.com/kujtimiihoxha/plis/runtime"
 	"github.com/kujtimiihoxha/plis/runtime/js"
 	"github.com/kujtimiihoxha/plis/runtime/lua"
+	"github.com/sirupsen/logrus"
 	"github.com/spf13/afero"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
 	"os"
+	"strconv"
 	"strings"
 )
 
@@ -183,31 +184,31 @@ func addFlags(command *cobra.Command, c config.ToolConfig) {
 		if v.Persistent {
 			switch v.Type {
 			case "string":
-				command.PersistentFlags().StringP(v.Name, v.Short, v.Default.(string), v.Description)
+				command.PersistentFlags().StringP(v.Name, v.Short, v.Default, v.Description)
 			case "int":
-				f := v.Default.(float64)
+				f, _ := strconv.ParseFloat(v.Default, 32)
 				iv := int(f)
 				command.PersistentFlags().IntP(v.Name, v.Short, iv, v.Description)
 			case "float":
-				f := v.Default.(float64)
+				f, _ := strconv.ParseFloat(v.Default, 32)
 				command.PersistentFlags().Float64P(v.Name, v.Short, f, v.Description)
 			case "bool":
-				b := v.Default.(bool)
+				b, _ := strconv.ParseBool(v.Default)
 				command.PersistentFlags().BoolP(v.Name, v.Short, b, v.Description)
 			}
 		} else {
 			switch v.Type {
 			case "string":
-				command.Flags().StringP(v.Name, v.Short, v.Default.(string), v.Description)
+				command.Flags().StringP(v.Name, v.Short, v.Default, v.Description)
 			case "int":
-				f := v.Default.(float64)
+				f, _ := strconv.ParseFloat(v.Default, 32)
 				iv := int(f)
 				command.Flags().IntP(v.Name, v.Short, iv, v.Description)
 			case "float":
-				f := v.Default.(float64)
+				f, _ := strconv.ParseFloat(v.Default, 32)
 				command.Flags().Float64P(v.Name, v.Short, f, v.Description)
 			case "bool":
-				b := v.Default.(bool)
+				b, _ := strconv.ParseBool(v.Default)
 				command.Flags().BoolP(v.Name, v.Short, b, v.Description)
 			}
 		}
